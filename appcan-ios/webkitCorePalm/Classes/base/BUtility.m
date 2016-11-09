@@ -585,7 +585,7 @@ static NSString *clientCertificatePwd = nil;
 	   [inUrl hasPrefix:F_APP_PATH]||
 	   [inUrl hasPrefix:F_RES_PATH]||
 	   [inUrl hasPrefix:F_DATA_PATH]||
-	   [inUrl hasPrefix:F_BOX_PATH]||
+	   [inUrl hasPrefix:F_BOX_PATH]||[inUrl hasPrefix:F_EXTERBOX_PATH]||
        [inUrl hasPrefix:@"file://"]) {
 		
 		return inUrl;
@@ -1530,17 +1530,27 @@ static NSString *clientCertificatePwd = nil;
 	if ([inPath hasPrefix:@"/var/mobile"]||[inPath hasPrefix:@"assets-library"]||[inPath hasPrefix:@"/private/var/mobile"]||[inPath hasPrefix:@"/Users"]||[inPath hasPrefix:@"file://"]) {
 		return inPath;
 	}
+    NSString *scheme = [[NSURL URLWithString:inPath] scheme];
+
 	NSURL *curURL = [meBrwView curUrl];
 	inPath = [BUtility makeUrl:[curURL absoluteString] url:inPath];
 	//box://
-	if ([inPath hasPrefix:F_BOX_PATH] || [inPath hasPrefix:F_EXTERBOX_PATH]) {
+    NSLog(@"appcan-->BUtility.m-->getAbsPath-->%@",inPath);
+    
+    if ([inPath hasPrefix:F_BOX_PATH] || [inPath hasPrefix:F_EXTERBOX_PATH]) {
+        
 		NSString * str = [BUtility getDocumentsPath:@"box"];
 		if (![[NSFileManager defaultManager] fileExistsAtPath:str]) {
 			[[NSFileManager defaultManager] createDirectoryAtPath:str withIntermediateDirectories:YES attributes:nil error:nil];
 		}
-		NSString *resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:6]];
-		return resultStr;
+        
+		//NSString *resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:6]];
+        NSString *resultStr =  resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:scheme.length+3]];;
+        
+        //NSLog(@"str=%@",resultStr);
+        return resultStr;
 	}
+    
 	if ([inPath hasPrefix:F_WGTS_PATH]||[inPath hasPrefix:F_APP_PATH]||[inPath hasPrefix:F_RES_PATH]) {
 //		EBrowserWindowContainer *eBrwWndContainer = (EBrowserWindowContainer*)meBrwView.meBrwWnd.superview;
         

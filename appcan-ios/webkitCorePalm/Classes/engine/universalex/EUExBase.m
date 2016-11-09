@@ -60,6 +60,8 @@
 
 -(NSString*)absPath:(NSString*)inPath{
     ACENSLog(@"inpath start=%@",inPath);
+    NSLog(@"appcan-->EUExBase.m-->absPath-->inpath start=%@",inPath);
+
     inPath = [inPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if ([inPath hasPrefix:@"file://"]) {
         inPath = [inPath substringFromIndex:[@"file://" length]];
@@ -69,14 +71,22 @@
         return inPath;
     }
     NSURL *curURL = [self.meBrwView curUrl];
+    
+    NSString *scheme = [[NSURL URLWithString:inPath] scheme];
+    
     inPath = [BUtility makeUrl:[curURL absoluteString] url:inPath];
+    
     //box://
+    NSLog(@"appcan-->EUExBase.m-->absPath-->%@",inPath);
+
    if ([inPath hasPrefix:F_BOX_PATH] || [inPath hasPrefix:F_EXTERBOX_PATH]) {
         NSString * str = [BUtility getDocumentsPath:@"box"];
         if (![[NSFileManager defaultManager] fileExistsAtPath:str]) {
             [[NSFileManager defaultManager] createDirectoryAtPath:str withIntermediateDirectories:YES attributes:nil error:nil];
         }
-        NSString *resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:6]];
+       
+         NSString *resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:scheme.length+3]];;
+       
         //NSLog(@"str=%@",resultStr);
         return resultStr;
     }
