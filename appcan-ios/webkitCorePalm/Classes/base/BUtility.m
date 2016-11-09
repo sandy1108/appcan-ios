@@ -570,92 +570,112 @@ static NSString *clientCertificatePwd = nil;
     
 }
 
-+(NSString*)makeUrl:(NSString*)inBaseStr url:(NSString*)inUrl{
-	ACENSLog(@"inbaseUrl=%@",inBaseStr);
-	//
-	if (inUrl==nil && [inUrl length]==0) {
-		return nil;
-	}
-	if(inBaseStr==nil && [inBaseStr length]==0){
-		return nil;
-	}
-	if([inUrl hasPrefix:F_HTTP_PATH]||
-	   [inUrl hasPrefix:F_HTTPS_PATH]||
-	   [inUrl hasPrefix:F_WGTS_PATH]||
-	   [inUrl hasPrefix:F_APP_PATH]||
-	   [inUrl hasPrefix:F_RES_PATH]||
-	   [inUrl hasPrefix:F_DATA_PATH]||
-	   [inUrl hasPrefix:F_BOX_PATH]||
++ (NSString*)makeUrl:(NSString*)inBaseStr url:(NSString*)inUrl {
+    
+    if (inUrl==nil && [inUrl length]==0) {
+        
+        return nil;
+    }
+    
+    if(inBaseStr==nil && [inBaseStr length]==0){
+        
+        return nil;
+    }
+    
+    if([inUrl hasPrefix:F_HTTP_PATH]||
+       [inUrl hasPrefix:F_HTTPS_PATH]||
+       [inUrl hasPrefix:F_WGTS_PATH]||
+       [inUrl hasPrefix:F_APP_PATH]||
+       [inUrl hasPrefix:F_RES_PATH]||
+       [inUrl hasPrefix:F_DATA_PATH]||
+       [inUrl hasPrefix:F_BOX_PATH]||
+       [inUrl hasPrefix:F_EXTERBOX_PATH]||
        [inUrl hasPrefix:@"file://"]) {
-		
-		return inUrl;
-		
-	}
-	//NSString *inBaseUrl = [inBaseStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	NSString *inBaseUrl = inBaseStr;
-	//NSString *inBaseUrl = [self makeSpecUrl:inBaseStr];
-	ACENSLog(@"BUtility inbaseUrl=%@",inBaseUrl);
-	
-	//"/"
-	if ([inUrl hasPrefix:@"/"]) {
-		if ([inBaseUrl hasPrefix:F_HTTP_PATH]) {
-			NSInteger s = -1;
-			NSInteger count = 0;
-			NSString *newS = inBaseUrl;
-			for (int i=0; i<3; i++) {
-				NSRange range = [newS rangeOfString:@"/"];
-				s = range.location;
-				if(s!=NSNotFound){
-					count+=s+1;
-					newS = [newS substringFromIndex:(s+1)];
-				}
-			}
-			if (count!=0) {
-				NSRange range = {0,count-1};
-				inBaseUrl = [inBaseUrl substringWithRange:range];
-				inBaseUrl =[inBaseUrl stringByAppendingString:inUrl];
-				return inBaseUrl;
-			}
-		}
-		else{
-			/*
+        
+        return inUrl;
+        
+    }
+    
+    //NSString *inBaseUrl = [inBaseStr stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *inBaseUrl = inBaseStr;
+    //NSString *inBaseUrl = [self makeSpecUrl:inBaseStr];
+    
+    if ([inUrl hasPrefix:@"/"]) {
+        
+        if ([inBaseUrl hasPrefix:F_HTTP_PATH]) {
+            
+            NSInteger s = -1;
+            NSInteger count = 0;
+            NSString *newS = inBaseUrl;
+            
+            for (int i=0; i<3; i++) {
+                
+                NSRange range = [newS rangeOfString:@"/"];
+                s = range.location;
+                
+                if(s != NSNotFound) {
+                    
+                    count+=s+1;
+                    newS = [newS substringFromIndex:(s+1)];
+                }
+                
+            }
+            
+            if (count != 0) {
+                
+                NSRange range = {0,count-1};
+                inBaseUrl = [inBaseUrl substringWithRange:range];
+                inBaseUrl =[inBaseUrl stringByAppendingString:inUrl];
+                
+                return inBaseUrl;
+            }
+            
+        } else {
+            
+            /*
              if ([inUrl hasPrefix:@"/.."]) {
-             inUrl = [inUrl substringFromIndex:3];					
+             inUrl = [inUrl substringFromIndex:3];
              }
              inUrl = [NSString stringWithFormat:@"%@/%@",F_RES_ROOT_PATH,[inUrl substringFromIndex:1]];*/
-			//return inUrl;
+            //return inUrl;
         }
-	}	
-	
-	// ../../
-	NSUInteger index = [inUrl rangeOfString:@"../"].location;
-	NSInteger layer = 0;
-	while (index!=NSNotFound) {
-		layer++;			
-		inUrl =[inUrl substringFromIndex:(index+3)]; 
-		index = [inUrl rangeOfString:@"../"].location;
-	}
+    }
     
+    // ../../
+    NSUInteger index = [inUrl rangeOfString:@"../"].location;
+    NSInteger layer = 0;
+    
+    while (index!=NSNotFound) {
+        
+        layer++;
+        inUrl =[inUrl substringFromIndex:(index+3)];
+        index = [inUrl rangeOfString:@"../"].location;
+        
+    }
     
     NSRange brange = [inBaseUrl rangeOfString:@"/" options:NSBackwardsSearch];
-    
-//	NSUInteger count1 = [self lastIndexOf:inBaseUrl findChar:'/'];
+    //NSUInteger count1 = [self lastIndexOf:inBaseUrl findChar:'/'];
     NSUInteger count = brange.location + 1;
-	while(layer>=0){
-		inBaseUrl = [inBaseUrl substringWithRange:NSMakeRange(0,count-1)];
-//		count = [self lastIndexOf:inBaseUrl findChar:'/'];
-        count = [inBaseUrl rangeOfString:@"/" options:NSBackwardsSearch].location + 1;
-//        count1 = [self lastIndexOf:inBaseUrl findChar:'/'];
-		layer--;
-        //http://
-		if (count<=7 || count==NSNotFound) {
-			break;
-		}
-	}
-	inBaseUrl = [NSString stringWithFormat:@"%@/%@",inBaseUrl,inUrl];
-	ACENSLog(@"inbaseUrl out=%@",inBaseUrl);
     
-	return inBaseUrl;
+    while(layer >= 0){
+        
+        inBaseUrl = [inBaseUrl substringWithRange:NSMakeRange(0,count-1)];
+        //count = [self lastIndexOf:inBaseUrl findChar:'/'];
+        count = [inBaseUrl rangeOfString:@"/" options:NSBackwardsSearch].location + 1;
+        //count1 = [self lastIndexOf:inBaseUrl findChar:'/'];
+        layer--;
+        //http://
+        
+        if (count<=7 || count==NSNotFound) {
+            
+            break;
+        }
+        
+    }
+    
+    inBaseUrl = [NSString stringWithFormat:@"%@/%@",inBaseUrl,inUrl];
+    
+    return inBaseUrl;
 }
 
 //得到documents的路径	
@@ -1518,72 +1538,117 @@ static NSString *clientCertificatePwd = nil;
     return [OpenUDID value];
 }
 
-+(NSString*)getAbsPath:(EBrowserView*)meBrwView path:(NSString*)inPath{
++ (NSString*)getAbsPath:(EBrowserView*)meBrwView path:(NSString*)inPath {
+    
     if (!meBrwView) {
+        
         return @"";
     }
-	inPath = [inPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	if ([inPath hasPrefix:@"file://"]) {
-		inPath = [inPath substringFromIndex:[@"file://" length]];
-		return inPath;
-	}
-	if ([inPath hasPrefix:@"/var/mobile"]||[inPath hasPrefix:@"assets-library"]||[inPath hasPrefix:@"/private/var/mobile"]||[inPath hasPrefix:@"/Users"]||[inPath hasPrefix:@"file://"]) {
-		return inPath;
-	}
-	NSURL *curURL = [meBrwView curUrl];
-	inPath = [BUtility makeUrl:[curURL absoluteString] url:inPath];
-	//box://
-	if ([inPath hasPrefix:F_BOX_PATH] || [inPath hasPrefix:F_EXTERBOX_PATH]) {
-		NSString * str = [BUtility getDocumentsPath:@"box"];
-		if (![[NSFileManager defaultManager] fileExistsAtPath:str]) {
-			[[NSFileManager defaultManager] createDirectoryAtPath:str withIntermediateDirectories:YES attributes:nil error:nil];
-		}
-		NSString *resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:6]];
-		return resultStr;
-	}
-	if ([inPath hasPrefix:F_WGTS_PATH]||[inPath hasPrefix:F_APP_PATH]||[inPath hasPrefix:F_RES_PATH]) {
-//		EBrowserWindowContainer *eBrwWndContainer = (EBrowserWindowContainer*)meBrwView.meBrwWnd.superview;
+    
+    inPath = [inPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    if ([inPath hasPrefix:@"file://"]) {
         
+        inPath = [inPath substringFromIndex:[@"file://" length]];
+        return inPath;
         
+    }
+    
+    if ([inPath hasPrefix:@"/var/mobile"]||
+        [inPath hasPrefix:@"assets-library"]||
+        [inPath hasPrefix:@"/private/var/mobile"]||
+        [inPath hasPrefix:@"/Users"]||
+        [inPath hasPrefix:@"file://"]) {
+        
+        return inPath;
+    }
+    
+    NSString *scheme = [[NSURL URLWithString:inPath] scheme];
+    
+    NSURL *curURL = [meBrwView curUrl];
+    inPath = [BUtility makeUrl:[curURL absoluteString] url:inPath];
+    //box://
+    
+    if ([inPath hasPrefix:F_BOX_PATH] || [inPath hasPrefix:F_EXTERBOX_PATH]) {
+        
+        NSString * str = [BUtility getDocumentsPath:@"box"];
+        
+        if (![[NSFileManager defaultManager] fileExistsAtPath:str]) {
+            
+            [[NSFileManager defaultManager] createDirectoryAtPath:str withIntermediateDirectories:YES attributes:nil error:nil];
+        }
+        
+        //NSString *resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:6]];
+        NSString *resultStr =  resultStr = [NSString stringWithFormat:@"%@/%@",str,[inPath substringFromIndex:scheme.length+3]];;
+        
+        return resultStr;
+    }
+    
+    if ([inPath hasPrefix:F_WGTS_PATH]||[inPath hasPrefix:F_APP_PATH]||[inPath hasPrefix:F_RES_PATH]) {
+        
+        //EBrowserWindowContainer *eBrwWndContainer = (EBrowserWindowContainer*)meBrwView.meBrwWnd.superview;
         EBrowserWindowContainer *eBrwWndContainer = [EBrowserWindowContainer getBrowserWindowContaier:meBrwView];
         
+        NSString *absPath = nil;
         
-		NSString *absPath =nil;
-		absPath=[meBrwView.meBrwCtrler.mwWgtMgr curWidgetPath:eBrwWndContainer.mwWgt];
-		NSString *relativePath=nil;
-		if ([inPath hasPrefix:F_APP_PATH]) {
-			relativePath =[inPath substringFromIndex:6];
-		}
-		if ([inPath hasPrefix:F_RES_PATH]) {
-			relativePath =[inPath substringFromIndex:6];
-			if (eBrwWndContainer.mwWgt.wgtType==F_WWIDGET_MAINWIDGET) {
+        absPath=[meBrwView.meBrwCtrler.mwWgtMgr curWidgetPath:eBrwWndContainer.mwWgt];
+        
+        NSString *relativePath = nil;
+        
+        if ([inPath hasPrefix:F_APP_PATH]) {
+            
+            relativePath =[inPath substringFromIndex:6];
+        }
+        
+        if ([inPath hasPrefix:F_RES_PATH]) {
+            
+            relativePath =[inPath substringFromIndex:6];
+            
+            if (eBrwWndContainer.mwWgt.wgtType==F_WWIDGET_MAINWIDGET) {
+                
                 BOOL isCopyFinish = [[[NSUserDefaults standardUserDefaults]objectForKey:F_UD_WgtCopyFinish] boolValue];
+                
                 if (theApp.useUpdateWgtHtmlControl && isCopyFinish) {
+                    
                     if ([BUtility getSDKVersion]<5.0) {
+                        
                         absPath =[BUtility getCachePath:@"widget/wgtRes"];
-                    }else {
+                        
+                    } else {
+                        
                         absPath =[BUtility getDocumentsPath:@"widget/wgtRes"];
+                        
                     }
-                }else {
+                } else {
+                    
                     absPath =[BUtility getResPath:@"widget/wgtRes"];
+                    
                 }
-			}else {
-				absPath = [NSString stringWithFormat:@"%@/wgtRes",absPath];
-			}
-			ACENSLog(@"absPath middle=%@",absPath);
-			
-		}
-		if ([inPath hasPrefix:F_WGTS_PATH]) {
-			absPath = [BUtility getDocumentsPath:@"widgets"];
-			relativePath =[inPath substringFromIndex:7]; 
-		}
-		inPath = [NSString stringWithFormat:@"%@/%@",absPath,relativePath];
-		ACENSLog(@"inPath end=%@",inPath);
-	}
-	if ([inPath hasPrefix:@"file://"]) {
-		inPath = [inPath substringFromIndex:[@"file://" length]];
-	}
-	return inPath;
+                
+            } else {
+                
+                absPath = [NSString stringWithFormat:@"%@/wgtRes",absPath];
+            }
+            
+        }
+        if ([inPath hasPrefix:F_WGTS_PATH]) {
+            
+            absPath = [BUtility getDocumentsPath:@"widgets"];
+            
+            relativePath =[inPath substringFromIndex:7];
+        }
+        
+        inPath = [NSString stringWithFormat:@"%@/%@",absPath,relativePath];
+        
+    }
+    
+    if ([inPath hasPrefix:@"file://"]) {
+        
+        inPath = [inPath substringFromIndex:[@"file://" length]];
+        
+    }
+    
+    return inPath;
 }
 
 #pragma mark for rand num
