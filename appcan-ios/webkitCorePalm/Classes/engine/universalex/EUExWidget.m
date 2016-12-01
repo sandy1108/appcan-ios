@@ -1591,4 +1591,27 @@ result;\
     }
 }
 
+
+- (void)setPushHost:(NSMutableArray *)inArguments {
+    
+    NSDictionary *info = inArguments.firstObject;
+    
+    NSString *pushHost = info[@"pushHost"] ? info[@"pushHost"] : @"";
+    
+    if (pushHost && [pushHost length] > 0) {
+        theApp.useBindUserPushURL = pushHost;
+        [self jsSuccessWithName:@"uexWidget.cbSetPushHost" opId:0 dataType:UEX_CALLBACK_DATATYPE_INT intData:0];
+    } else {
+        
+        [self jsSuccessWithName:@"uexWidget.cbSetPushHost" opId:0 dataType:UEX_CALLBACK_DATATYPE_INT intData:1];
+        
+    }
+    
+}
+
+- (void)getPushHost:(NSMutableArray *)inArguments {
+    
+    [self jsSuccessWithName:@"uexWidget.cbGetPushHost" opId:0 dataType:UEX_CALLBACK_DATATYPE_TEXT strData:theApp.useBindUserPushURL];
+    
+}
 @end
