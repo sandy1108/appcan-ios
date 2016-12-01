@@ -806,6 +806,7 @@ NSString * webappShowAactivety;
 }
 
 #pragma mark -update 
+#pragma mark -update
 -(BOOL)isNeetUpdateWgt{
     if (theApp.useUpdateWgtHtmlControl) {
         NSString *newConfigPath = nil;
@@ -827,13 +828,32 @@ NSString * webappShowAactivety;
         SpecConfigParser *appWidgetXml = [[SpecConfigParser alloc] init];
         NSString *mAppVer = [appWidgetXml initwithReqData:appConfigPath queryPara:CONFIG_TAG_VERSION type:YES];
         [appWidgetXml release];
-        NSComparisonResult result = [mNewVer compare:mAppVer];
-        if (result==NSOrderedAscending) {
-            return YES;
-        }
+        
+        BOOL ret = [self version:mAppVer isGreaterThan:mNewVer];
+        
+        return ret;
+        
     }
     return NO;
 }
+- (BOOL)version:(NSString *)version1 isGreaterThan:(NSString *)version2 {
+    
+    NSArray *versions1 = [version1 componentsSeparatedByString:@"."];
+    NSArray *versions2 = [version2 componentsSeparatedByString:@"."];
+    
+    for (int i = 0; i< (versions1.count> versions2.count)?versions1.count :versions2.count; i++) {
+        
+        if (versions1.count < i+1) return NO;
+        if (versions2.count < i+1) return YES;
+        
+        int v1 = [versions1[i] intValue];
+        int v2 = [versions2[i] intValue];
+        if (v1 != v2)
+            return v1 > v2;
+    }
+    return NO;
+}
+
 /*
  //md5 deprecate 1.1.022
  -(NSString *)md5Str:(NSString *)inImei widgetOneId:(NSString*)inWidgetOneId appId:(NSString*)inAppId ver:(NSString*)inVer channelCode:(NSString*)inChannelCode{

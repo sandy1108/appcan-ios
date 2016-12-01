@@ -298,6 +298,60 @@ typedef NS_ENUM(NSInteger,ACEDisturbLongPressGestureStatus){
         [self jsSuccessWithName:@"uexWindow.cbPageBack" opId:0 dataType:1 intData:UEX_CFAILED];
     }
 }
+
+- (void)pageGoBack:(NSMutableArray *)inArguments {
+    
+    NSLog(@"appcan-->pageGoBack");
+    NSString *inWndName = [inArguments objectAtIndex:0];
+    NSString *inPopName = [inArguments objectAtIndex:1];
+    
+    EBrowserWindow *eBrwWnd = nil;
+    EBrowserView *ePopBrwView = nil;
+    
+    if (!KUEXIS_NSString(inPopName)) {
+        return;
+    }
+    
+    if (!meBrwView) {
+        return;
+    }
+    
+    if (!meBrwView.meBrwWnd) {
+        return;
+    }
+    
+    if (!KUEXIS_NSString(inWndName)) {
+        eBrwWnd = meBrwView.meBrwWnd;
+    }
+    
+    EBrowserWindowContainer *eBrwWndContainer = [EBrowserWindowContainer getBrowserWindowContaier:meBrwView];
+    
+    if (!eBrwWnd) {
+        eBrwWnd = [eBrwWndContainer brwWndForKey:inWndName];
+    }
+    if (eBrwWnd == nil) {
+        return;
+    }
+    ePopBrwView = [eBrwWnd popBrwViewForKey:inPopName];
+    if (!ePopBrwView) {
+        return;
+    }
+    
+    
+    if ([ePopBrwView.meBrowserView canGoBack]) {
+        
+        [ePopBrwView.meBrowserView goBack];
+        
+        [self jsSuccessWithName:@"uexWindow.cbPageGoBack" opId:0 dataType:1 intData:UEX_CSUCCESS];
+        
+    } else {
+        
+        [self jsSuccessWithName:@"uexWindow.cbPageGoBack" opId:0 dataType:1 intData:UEX_CFAILED];
+        
+    }
+    
+}
+
 -(void)alert:(NSMutableArray *)inArguments{
     NSString *inTitle = [inArguments objectAtIndex:0];
     NSString *inMessage = [inArguments objectAtIndex:1];
