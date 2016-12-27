@@ -1594,7 +1594,7 @@ result;\
 
 - (void)setPushHost:(NSMutableArray *)inArguments {
     
-    NSDictionary *info = inArguments.firstObject;
+    NSDictionary *info = [inArguments.firstObject JSONValue];
     
     NSString *pushHost = info[@"pushHost"] ? info[@"pushHost"] : @"";
     
