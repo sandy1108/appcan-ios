@@ -121,7 +121,7 @@
     if (!saveWgtPath) {
         saveWgtPath = [[NSString alloc] initWithFormat:@"%@/%@.zip",folderPath,[self md5:self.downLoadURL]];
     }
-    NSLog(@"savePath=%@",saveWgtPath);
+    ACENSLog(@"savePath=%@",saveWgtPath);
     NSString *tempPath = [NSString stringWithFormat:@"%@/%@.temp",folderPath,[self md5:self.downLoadURL]];
     ACENSLog(@"savePath=%@",tempPath);
     //
@@ -233,41 +233,115 @@
 }
 
 //unzip
--(BOOL)unZipUpdateWgt:(NSString*)inWgtName{
+- (BOOL)unZipUpdateWgt:(NSString *)inWgtName {
+    
 	ZipArchive *zipObj = [[[ZipArchive alloc] init] autorelease];
+    NSFileManager * fileMgr = [NSFileManager defaultManager];
+    
 	NSString *sourceWgt = inWgtName;
+    
     NSString *outPath = nil;
-    if ([BUtility getSDKVersion]<5.0) {
+    
+    if ([BUtility getSDKVersion] < 5.0) {
         outPath = [BUtility getCachePath:@"widget/"];
     }else {
         outPath = [BUtility getDocumentsPath:@"widget/"];
     }
-	if ([[NSFileManager defaultManager] fileExistsAtPath:sourceWgt]) {
-        BOOL isOK = NO;
-        isOK = [zipObj UnzipOpenFile:sourceWgt]; 
-        if (isOK) {
-            isOK = [zipObj UnzipFileTo:outPath overWrite:YES];
-            if (isOK) {
-                isOK = [zipObj UnzipCloseFile]; 
-                if (isOK) {
-                    [[NSFileManager defaultManager] removeItemAtPath:sourceWgt error:nil];
-                    return YES;
-                }
-            }else {
-                return NO;
+    
+    NSString * tempFolder = [[[NSUUID UUID] UUIDString] lowercaseString];
+    NSString * tempFolderPath = [BUtility getDocumentsPath:tempFolder];
+    [fileMgr createDirectoryAtPath:tempFolderPath withIntermediateDirectories:YES attributes:nil error:nil];//创建临时目录做文件中转
+    
+    if ([zipObj UnzipOpenFile:sourceWgt] && [zipObj UnzipFileTo:tempFolderPath overWrite:YES] && [zipObj UnzipCloseFile]) {//解压到临时目录
+        
+        NSArray * fileList = [fileMgr contentsOfDirectoryAtPath:tempFolderPath error:nil];
+        
+        if ([fileList containsObject:@"widget"] && [fileList containsObject:@"plugin"]) {//新版本的补丁包
+            NSString * widgetPath = [tempFolderPath stringByAppendingPathComponent:@"widget/"];
+            NSArray * widgetPathFolderList = [fileMgr contentsOfDirectoryAtPath:widgetPath error:nil];
+            widgetPath = [widgetPath stringByAppendingPathComponent:[widgetPathFolderList firstObject]];
+            ACENSLog(@"新版本的补丁包:\n%@\n%@\n%@",widgetPath,outPath);
+            if ([self copyItemsFromPath:widgetPath toPath:outPath]) {
+                NSLog(@"=====新版本的补丁包=====:\n%@\n%@",widgetPath,outPath);
+                [fileMgr removeItemAtPath:tempFolderPath error:nil];
+                [fileMgr removeItemAtPath:sourceWgt error:nil];
+                return YES;
             }
-        }else {
-            return NO;
-        }	
-	}
+        } else {//旧版本的补丁包
+            ACENSLog(@"旧版本的补丁包:%@",tempFolderPath);
+            if ([self copyItemsFromPath:tempFolderPath toPath:outPath]) {
+                NSLog(@"=====旧版本的补丁包=====:\n%@\n%@",tempFolderPath,outPath);
+                [fileMgr removeItemAtPath:tempFolderPath error:nil];
+                [fileMgr removeItemAtPath:sourceWgt error:nil];
+                return YES;
+            }
+        }
+        
+    }
+    
+    [fileMgr removeItemAtPath:tempFolderPath error:nil];
     return NO;
+    
 }
+
+- (BOOL)copyItemsFromPath:(NSString *)fromPath toPath:(NSString *)toPath {
+    
+    NSError * error;
+    NSFileManager * fileMgr = [NSFileManager defaultManager];
+    
+    BOOL folderFlag = YES;
+    
+    if (![fileMgr fileExistsAtPath:toPath isDirectory:&folderFlag]) {//如果目标路径不存在则创建
+        BOOL result = [fileMgr createDirectoryAtPath:toPath withIntermediateDirectories:NO attributes:nil error:&error];
+        [BUtility addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:toPath]];
+        if (!result && error) {
+            return NO;
+        }
+    }
+    
+    if ([fileMgr fileExistsAtPath:fromPath]) {
+        NSError * error;
+        NSDirectoryEnumerator * fromEnumerator = [fileMgr enumeratorAtPath:fromPath];
+        NSString * fileName = nil;
+        BOOL result;
+        while ((fileName = [fromEnumerator nextObject])) {
+            NSString * oldFilePath = [fromPath stringByAppendingPathComponent:fileName];
+            NSString * newFilePath = [toPath stringByAppendingPathComponent:fileName];
+            BOOL flag = YES;
+            if ([fileMgr fileExistsAtPath:oldFilePath isDirectory:&flag]) {
+                if (!flag) {
+                    if (![[fileName substringToIndex:1] isEqualToString:@"."]) {
+                        if ([fileMgr fileExistsAtPath:newFilePath]) {
+                            result = [fileMgr removeItemAtPath:newFilePath error:&error];
+                            if (!result && error) {
+                                return NO;
+                            }
+                        }
+                        result =  [fileMgr copyItemAtPath:oldFilePath toPath:newFilePath error:&error];
+                        if (!result && error) {
+                            return NO;
+                        }
+                    }
+                } else {
+                    result = [fileMgr createDirectoryAtPath:newFilePath withIntermediateDirectories:YES attributes:nil error:&error];
+                    if (!result && error) {
+                        return NO;
+                    }
+                }
+            }
+        }
+    } else {
+        return NO;
+    }
+    return YES;
+}
+
 
 -(NSString *)md5:(NSString *)str {
 	const char *cStr = [str UTF8String];	
 	unsigned char result[16];
 	
-	CC_MD5( cStr, strlen(cStr), result );
+	CC_MD5( cStr, (CC_LONG)strlen(cStr), result );
 	
 	return [NSString stringWithFormat:
 			@"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",			
