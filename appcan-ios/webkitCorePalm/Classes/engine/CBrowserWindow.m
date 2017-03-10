@@ -122,27 +122,16 @@ const float AppCanFinalProgressValue = 0.9f;
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-	if (webView != NULL) {
-		ACENSLog(@"didFailLoadWithError url is %@", [webView.request URL]);
-		ACENSLog(@"page loaded failed! Error - %@ %@",[error localizedDescription],[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]);
-		[((ACEBrowserView *)webView) notifyPageError];
-        [((ACEBrowserView *)webView) continueMultiPopoverLoading];
-        NSURLRequest *request = webView.request;
-        
-        BOOL isFrame = ![[[request URL] absoluteString] isEqualToString:[[request mainDocumentURL] absoluteString]];
-        if (!isFrame) {
-            NSString *errorPath = [self errorHTMLPath];
-            NSURL *errorURL = [BUtility stringToUrl:errorPath];
-            if(![webView.request.URL.path isEqual:errorPath]){
-                [((ACEBrowserView *)webView) loadWithUrl:errorURL];
-            }
-        }
-        
-
+    if (webView != NULL) {
+        ACENSLog(@"didFailLoadWithError url is %@", [webView.request URL]);
+        ACENSLog(@"page loaded failed! Error - %@ %@",[error localizedDescription],[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]);
+        ACEBrowserView *aceWebView = (ACEBrowserView *)webView;
+        [aceWebView notifyPageError];
+        [aceWebView continueMultiPopoverLoading];
         
         [self webView:webView didFailLoadWithErrorOption:error];
         
-	}
+    }
 }
 
 -(BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
