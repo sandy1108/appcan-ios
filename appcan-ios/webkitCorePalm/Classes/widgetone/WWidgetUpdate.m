@@ -21,6 +21,7 @@
 #import "ASIHTTPRequest.h"
 #import "BUtility.h"
 #import  <CommonCrypto/CommonDigest.h>
+#import "SpecConfigParser.h"
 #define FWGTUPDATEPrompt 1000
 #define FWGTUPDATEError  1001
 #define FWGTUUPDATEUNIQUE   @"AppCanWgtID"
@@ -230,6 +231,108 @@
 -(void)setProgress:(float)newProgress{
     ACENSLog(@"has process :%f",newProgress);
     _downProgress.progress = newProgress;
+}
+
+-(void)unZipUpdateSubWgt:(NSString *)subWidgetPatchZipPath {
+    
+    ZipArchive *zip = [[ZipArchive alloc] init];
+    NSFileManager *fileMgr = [NSFileManager defaultManager];
+    
+    //解压后的widget包的最终路径
+    NSString *outputPath = [BUtility getDocumentsPath:@"widgets"];
+    
+    //创建临时目录做文件中转站
+    NSString *tmpPatchPath = [BUtility getDocumentsPath:@"uexAppStoreMgrSubWidget"];
+    
+    [fileMgr removeItemAtPath:tmpPatchPath error:nil];
+    [fileMgr createDirectoryAtPath:tmpPatchPath withIntermediateDirectories:YES attributes:nil error:nil];
+    
+    if ([zip UnzipOpenFile:subWidgetPatchZipPath] &&
+        [zip UnzipFileTo:tmpPatchPath overWrite:YES] &&
+        [zip UnzipCloseFile]) {
+        
+        
+        NSString *newVersion = @"";
+        NSString *subAppID = @"";
+        
+        //先解压到临时目录,由于不同的EMM后台zip包的目录也不同,在copy前需判断zip包的目录结构
+        
+        NSArray *fileList = [fileMgr contentsOfDirectoryAtPath:tmpPatchPath error:nil];
+        
+        if ([fileList containsObject:@"widget"] && [fileList containsObject:@"plugin"]) {
+            
+            NSString  *tmpWidgetPath = [tmpPatchPath stringByAppendingPathComponent:@"widget"];
+            
+            NSArray *widgetPathFolderList = [fileMgr contentsOfDirectoryAtPath:tmpWidgetPath error:nil];
+            
+            subAppID = [NSString stringWithFormat:@"%@", [widgetPathFolderList firstObject]];
+            //拼接上appID
+            tmpWidgetPath = [tmpWidgetPath stringByAppendingPathComponent:subAppID];
+            outputPath = [outputPath stringByAppendingPathComponent:subAppID];
+            
+            //新版补丁包config.xml目录结构: widget(plugin并列)/appID/config.xml
+            NSString *configPath = [tmpWidgetPath stringByAppendingPathComponent:@"config.xml"];
+            
+            SpecConfigParser * widgetXml = [[SpecConfigParser alloc] init];
+            
+          newVersion = [widgetXml initwithReqData:configPath queryPara:@"version" type:YES];
+            
+            [widgetXml release];
+            //widgets/appId/version/config.xml 最终子应用的目录
+            outputPath =[outputPath stringByAppendingPathComponent:newVersion];
+            
+            if ([self copyItemsFromPath:tmpWidgetPath toPath:outputPath ]) {
+                
+                NSLog(@"appcan-->Engine-->ACEWidgetUpdateUtility.m-->unZipSubWidgetNeedPatchUpdate-->outputPath = %@", outputPath);
+                
+                [fileMgr removeItemAtPath:tmpPatchPath error:nil];
+                [fileMgr removeItemAtPath:subWidgetPatchZipPath error:nil];
+                
+            } else {
+                NSLog(@"新版本的补丁包--->>更新失败");
+            }
+            
+        } else {
+            
+            NSArray *widgetPathFolderList = [fileMgr contentsOfDirectoryAtPath:tmpPatchPath error:nil];
+            
+            subAppID = [NSString stringWithFormat:@"%@", [widgetPathFolderList firstObject]];
+            
+            //拼接上appID
+            NSString *tmpWidgetPath = [tmpPatchPath stringByAppendingPathComponent:subAppID];
+            outputPath = [outputPath stringByAppendingPathComponent:subAppID];
+            
+            NSString *configPath = [tmpWidgetPath stringByAppendingPathComponent:@"config.xml"];
+            
+            SpecConfigParser * widgetXml = [[SpecConfigParser alloc] init];
+            
+            newVersion = [widgetXml initwithReqData:configPath queryPara:@"version" type:YES];
+            
+            [widgetXml release];
+            
+            //widgets/appId/version/config.xml 最终子应用的目录
+            outputPath =[outputPath stringByAppendingPathComponent:newVersion];
+            
+            if ([self copyItemsFromPath:tmpWidgetPath toPath:outputPath]) {
+                
+                NSLog(@"appcan-->old-->Engine-->ACEWidgetUpdateUtility.m-->unZipSubWidgetNeedPatchUpdate-->outputPath = %@", outputPath);
+                
+                [fileMgr removeItemAtPath:tmpPatchPath error:nil];
+                [fileMgr removeItemAtPath:subWidgetPatchZipPath error:nil];
+                
+            } else {
+                
+                NSLog(@"旧版本的补丁包--->>更新失败");
+                
+            }
+        }
+        
+        if (newVersion && newVersion.length > 0){
+            
+            [NSUserDefaults.standardUserDefaults setObject:newVersion forKey:subAppID];
+        }
+    }
+    
 }
 
 //unzip

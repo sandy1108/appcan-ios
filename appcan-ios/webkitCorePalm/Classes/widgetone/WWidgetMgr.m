@@ -372,7 +372,32 @@ NSString * webappShowAactivety;
     WWidget *wgtObj =[wgtDict objectForKey:tmpAppId];
     
     //解析config.xml
-    NSString *configPath =[BUtility getDocumentsPath:[NSString stringWithFormat:@"%@/%@/%@",F_NAME_WIDGETS,tmpAppId,F_NAME_CONFIG]];
+    NSString *configPath = @"";
+    NSString *newVersion = @"";
+    BOOL isNewVersion = NO;
+    
+   // configPath =[BUtility getDocumentsPath:[NSString stringWithFormat:@"%@/%@/%@",F_NAME_WIDGETS,tmpAppId,F_NAME_CONFIG]];
+    
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:tmpAppId]) {
+        
+        newVersion = [NSString stringWithFormat:@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:tmpAppId]];
+        
+        configPath =[BUtility getDocumentsPath:[NSString stringWithFormat:@"%@/%@/%@/%@", F_NAME_WIDGETS, tmpAppId, newVersion, F_NAME_CONFIG]];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:configPath]) {
+            
+            isNewVersion = YES;
+            
+        } else {
+            
+            configPath =[BUtility getDocumentsPath:[NSString stringWithFormat:@"%@/%@/%@",F_NAME_WIDGETS,tmpAppId,F_NAME_CONFIG]];
+            
+        }
+    } else {
+        
+        configPath =[BUtility getDocumentsPath:[NSString stringWithFormat:@"%@/%@/%@",F_NAME_WIDGETS,tmpAppId,F_NAME_CONFIG]];
+        
+    }
+
     ACENSLog(@"configPath=%@",configPath);
     SpecConfigParser *widgetXml = [[SpecConfigParser alloc] init];
     NSString *mVer = [widgetXml initwithReqData:configPath queryPara:CONFIG_TAG_VERSION type:YES];
@@ -401,9 +426,18 @@ NSString * webappShowAactivety;
     }
     //
     if ([[NSFileManager defaultManager] fileExistsAtPath:configPath]) {
+        
         NSMutableDictionary *tmpWgtDict = [self wgtParameters:configPath];
+        
         NSString *tmpWgtOneId = [BUtility appKey];
+        
         NSString *wgtPath=[NSString stringWithFormat:@"%@/%@",F_NAME_WIDGETS,tmpAppId];
+        
+        if (isNewVersion) {
+            
+            wgtPath = [wgtPath stringByAppendingPathComponent:newVersion];
+        }
+        
         if (tmpWgtOneId) {
             [tmpWgtDict setObject:tmpWgtOneId forKey:CONFIG_TAG_WIDGETONEID];
         }

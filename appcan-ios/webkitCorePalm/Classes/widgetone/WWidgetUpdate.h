@@ -32,5 +32,7 @@
 -(void)promptUpdate;
 -(void)forceUpdateWgt;
 -(BOOL)unZipUpdateWgt:(NSString*)inWgtName;
+-(void)unZipUpdateSubWgt:(NSString *)subWidgetPatchZipPath;
+
 -(void)removeAllUD:(NSString*)idStr;
 @end
