@@ -399,7 +399,7 @@ result;\
             
             
         }
-        
+        NSLog(@"appcan-->Engine-->EUExWidget-->startWidget-->%@",inArguments);
         Class analysisClass =  NSClassFromString(@"AppCanAnalysis");
         
         if (analysisClass) {
@@ -534,15 +534,19 @@ result;\
     
     if (inRet && inRet.length != 0) {
         
-        if (eBrwWndContainer.mOpenerForRet) {
-            
-            NSString *jsStr = [NSString stringWithFormat:@"if(%@!=null){%@('%@');}",eBrwWndContainer.mOpenerForRet,eBrwWndContainer.mOpenerForRet,inRet];
-            
-            [[eBrwWndContainer.meOpenerContainer aboveWindow].meBrwView stringByEvaluatingJavaScriptFromString:jsStr];
-            
-        }
+    } else {
+        
+        inRet = @"";
+    }
+    
+    if (eBrwWndContainer.mOpenerForRet) {
+        
+        NSString *jsStr = [NSString stringWithFormat:@"if(%@!=null){%@('%@');}",eBrwWndContainer.mOpenerForRet,eBrwWndContainer.mOpenerForRet,inRet];
+        
+        [[eBrwWndContainer.meOpenerContainer aboveWindow].meBrwView stringByEvaluatingJavaScriptFromString:jsStr];
         
     }
+
     
     if (appID) {
         
@@ -1033,7 +1037,7 @@ result;\
         
         urlString =[NSString stringWithFormat:@"%@4.0/count/%@",theApp.useBindUserPushURL, [dictionary objectForKey:@"taskId"]];
     }
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->sendReportRead-->urlStr = %@",urlString);
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->-->sendReportRead-->urlStr = %@",urlString);
     
     NSURL *url = [NSURL URLWithString:urlString];
     
@@ -1061,7 +1065,7 @@ result;\
         tenantId = [NSString stringWithFormat:@"%@", [dictionary objectForKey:@"tenantId"]];
     }
     
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->appid = %@-->appkey = %@-->deviceToken = %@-->tenantId = %@",appid, appkey, deviceToken, tenantId);
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->appid = %@-->appkey = %@-->deviceToken = %@-->tenantId = %@",appid, appkey, deviceToken, tenantId);
     
     NSTimeInterval time = [[NSDate date]timeIntervalSince1970];
     
@@ -1095,7 +1099,7 @@ result;\
     [request setRequestHeaders:headerDict];
     [request setPostBody:(NSMutableData *)[[bodyDict JSONFragment] dataUsingEncoding:NSUTF8StringEncoding]];
     
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget.m.m-->sendReportRead-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
     
     [request setTimeOutSeconds:60];
     @weakify(request)
@@ -1106,12 +1110,12 @@ result;\
         
         if (200 == request.responseStatusCode) {
             
-            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->request.responseString is %@",request.responseString);
+            NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->request.responseString is %@",request.responseString);
             
             
         } else {
             
-            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
+            NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
             
         }
     }];
@@ -1119,7 +1123,7 @@ result;\
         
         @strongify(request);
         
-        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->setFailedBlock-->error is %@",[request error]);
+        NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->setFailedBlock-->error is %@",[request error]);
         
     }];
     
@@ -1222,9 +1226,7 @@ result;\
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *deviceToken = [defaults objectForKey:@"deviceToken"];
-    
     //deviceToken = @"29d68bac 42b117d8 414510e2 b57d9be3 a7088878 c6970b89 59ff2335 0a53250e";
-    
     NSLog(@"uid=%@, unickName=%@,deviceToken=%@",uId,uNickName,deviceToken);
     
     if (deviceToken && ![deviceToken isEqualToString:@"(null)"]) {
@@ -1237,6 +1239,8 @@ result;\
 }
 
 - (void)delPushInfo:(NSMutableArray *)inArguments {
+
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget-->delPushInfo-->");
 
     if ([theApp.useBindUserPushURL rangeOfString:@"push"].location == NSNotFound) {
         
@@ -1490,10 +1494,13 @@ result;\
 
 
 - (void)setPushState:(NSMutableArray*)inArguments {
-    
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget-->setPushState-->inArguments = %@",inArguments);
+
     int isPush =[[inArguments objectAtIndex:0] intValue];
-    ACENSLog(@"isPush=%d",isPush);
+    NSLog(@"isPush=%d",isPush);
+    
     [BUtility writeLog:[NSString stringWithFormat:@"-----setPushState------>>,theApp.usePushControl==%d",theApp.usePushControl]];
+    
     if(theApp.usePushControl == NO) {
         
         return;
@@ -1511,8 +1518,7 @@ result;\
         }else{
             [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeSound)];
         }
-    }
-    else {
+    } else {
         [[UIApplication sharedApplication] unregisterForRemoteNotifications];
     }
 }
@@ -1612,6 +1618,10 @@ result;\
 - (void)getPushHost:(NSMutableArray *)inArguments {
     
     [self jsSuccessWithName:@"uexWidget.cbGetPushHost" opId:0 dataType:UEX_CALLBACK_DATATYPE_TEXT strData:theApp.useBindUserPushURL];
+    
+}
+
+- (void)setPushBadge:(NSMutableArray *)inArguments {
     
 }
 @end

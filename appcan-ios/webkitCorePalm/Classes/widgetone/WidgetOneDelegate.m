@@ -491,6 +491,7 @@ NSString *AppCanJS = nil;
         if (ACE_iOSVersion >= 8.0)  {
             
 #ifdef __IPHONE_8_0
+            NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->注册推送");
             
             UIUserNotificationSettings *uns = [UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound) categories:nil];
             //注册推送
@@ -533,6 +534,7 @@ NSString *AppCanJS = nil;
     
     NSString * devStr = [deviceToken description];
 	NSString * firstStr = [devStr stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+    NSLog(@"appcna-->Engine-->didRegisterForRemoteNotificationsWithDeviceToken->devStr = %@,firstStr = %@", devStr, firstStr);
     
 	if (firstStr) {
         
@@ -548,7 +550,8 @@ NSString *AppCanJS = nil;
 // 注册APNs错误
 
 - (void)application:(UIApplication *)app didFailToRegisterForRemoteNotificationsWithError:(NSError *)err {
-    
+    NSLog(@"appcna-->Engine-->didRegisterForRemoteNotificationsWithDeviceToken-->error = %@", [err description]);
+
     [self invokeAppDelegateMethod:app didFailToRegisterForRemoteNotificationsWithError:err];
 }
 // 接收推送通知
@@ -728,7 +731,7 @@ NSString *AppCanJS = nil;
                             
                             if (paramValue) {
                                 
-                                [self performSelector:@selector(delayLoadByOtherAppWithParam:) withObject:paramValue afterDelay:1.0];
+                                [self performSelector:@selector(delayLoadByOtherAppWithParam:) withObject:paramValue afterDelay:1.6];
                                 
                             }
                             
@@ -738,7 +741,7 @@ NSString *AppCanJS = nil;
                     
                     if (_thirdInfoDict.count != 0) {
                         
-                        [self performSelector:@selector(delayLoadByOtherApp) withObject:self afterDelay:1.0];
+                        [self performSelector:@selector(delayLoadByOtherApp) withObject:self afterDelay:1.6];
                         
                     }
                     
@@ -753,6 +756,11 @@ NSString *AppCanJS = nil;
     //支付完成后返回当前应用shi调用
 	[self parseURL:url application:application];
     
+    
+    /*
+     
+     appcanEPortal://AppCan?qrNum=cdba6520-1aeb-4b4a-ae97-447af1787c80&message=AAECAzU5MzY3M0EwNTkzNzFDNjBDTj1ndW95dWFuL089Zm90b25vi2D9uc+KUNOUnarRu1XprPiaPg%3D%3D&ticketValue=eyJhbGciOiJIUzI1NiJ9.eyJyZXN1bHQiOiJ7XCJtYWlsXCI6XCJndW95dWFuQGZvdG9uLmNvbS5jblwiLFwibmFtZVwiOlwi6YOt546J5a6JXCIsXCJ1c2VyaWRcIjpcImd1b3l1YW5cIixcIm1vYmlsZVwiOlwiMTM5MDAwMDAwMDBcIixcIlNJQU1UR1RcIjpcIlRHVC02ODI1LXMxdGduZjVjRGlGUUtyNWF4NGhNcTk3cnJXTldjQVpjdmtQTE9ZZ2RqRWFreDZmY1dsLS5mb3Rvbi5jb20uY25cIixcImlhdFwiOjE0OTY3NDA3Njg5MjksXCJleHBcIjoxNDk2NzQ3OTY4OTI5fSJ9.BFSvM3nBVxFdgJ9I-mw4FQbdnvZ1oZP9WT9pCDHAHX4&ticketName=SIAMJWT&username=guoyuan
+     */
     [self invokeAppDelegateMethod:application openURL:url sourceApplication:sourceApplication annotation:annotation];
     
 	return YES;
@@ -841,7 +849,7 @@ NSString *AppCanJS = nil;
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     NSLog(@"appcan-->appCanEngine-->WidgetOneDelagate-->onResume -->%@",userInfo);
     
-    [NSThread detachNewThreadSelector:@selector(sendReportRead:) toTarget:self withObject:(id)userInfo];
+    [NSThread detachNewThreadSelector:@selector(clearPushBadge:) toTarget:self withObject:(id)userInfo];
     
 }
 
@@ -850,11 +858,12 @@ NSString *AppCanJS = nil;
     [meBrwCtrler.meBrwMainFrm.meBrwWgtContainer.meRootBrwWndContainer.meRootBrwWnd.meBrwView stringByEvaluatingJavaScriptFromString:@"if(uexWidget.onEnterBackground){uexWidget.onEnterBackground();}"];
     
     id number = [[NSUserDefaults standardUserDefaults] objectForKey:F_UD_BadgeNumber];
+    
     if (number) {
         
+        NSLog(@"appcan-->Engine-->EUExWidgetDelegate.m-->applicationDidEnterBackground-->number = %d",[number intValue]);
         [UIApplication sharedApplication].applicationIconBadgeNumber = [number intValue];
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:F_UD_BadgeNumber];
-        
     }
     
 	[self stopAllNetService];
@@ -1485,9 +1494,112 @@ NSString *AppCanJS = nil;
     }
 }
 
--(void)sendReportRead:(id)userInfo
-{
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->sendReportRead");
+-(void)reportPushBadge:(id)userInfo {
+    
+    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->reportPushBadge");
+    
+    @autoreleasepool {
+        
+        NSString *urlStr =[NSString stringWithFormat:@"%@4.0/count/",theApp.useBindUserPushURL];
+        
+        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->reportPushBadge-->urlStr = %@",urlStr);
+        
+        NSURL *requestUrl = [NSURL URLWithString:urlStr];
+        
+        NSString *appid = theApp.mwWgtMgr.mainWidget.appId?theApp.mwWgtMgr.mainWidget.appId:@"";
+        
+        NSString *appkey = [BUtility appKey];
+        
+        if (!appkey) {
+            
+            appkey = @"";
+        }
+        
+        NSString *deviceToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"];
+        
+        if (!deviceToken) {
+            
+            deviceToken = @"";
+        }
+        //住户ID tenantId
+        NSString *tenantId = nil;
+        
+        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->reportPushBadge-->appid = %@-->appkey = %@-->deviceToken = %@",appid, appkey, deviceToken);
+        
+        NSTimeInterval time = [[NSDate date]timeIntervalSince1970];
+        
+        NSString *varifyAppStr = [BUtility getVarifyAppMd5Code:appid AppKey:appkey time:time];
+         NSString *softToken = [EUtility md5SoftToken];
+        
+        NSMutableDictionary *headerDict = [NSMutableDictionary dictionaryWithObject:varifyAppStr forKey:@"appverify"];
+        [headerDict setObject:@"application/json" forKey:@"Content-Type"];
+        
+        NSString *masAppId = [NSString stringWithFormat:@"%@", appid];
+        
+        if (tenantId && tenantId.length > 0) {
+            
+            masAppId = [NSString stringWithFormat:@"%@:%@",tenantId, appid];
+            
+        }
+        [headerDict setObject:masAppId forKey:@"x-mas-app-id"];
+        //[headerDict setObject:appkey forKey:@"x-mas-app-key"];
+        //[number intValue]
+        NSString *badge = [NSString stringWithFormat:@"%d",[userInfo intValue]];
+        
+        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->reportPushBadge-->badge = %@", badge);
+        
+        NSMutableDictionary *bodyDict = [NSMutableDictionary dictionaryWithCapacity:5];
+        [bodyDict setObject:@"1" forKey:@"count"];
+        [bodyDict setObject:deviceToken forKey:@"deviceToken"];
+        [bodyDict setObject:softToken forKey:@"softToken"];
+        [bodyDict setObject:badge forKey:@"badge"];
+
+        NSString *useAppCanEMMTenantID = theApp.useAppCanEMMTenantID?theApp.useAppCanEMMTenantID:@"";
+        [bodyDict setObject:useAppCanEMMTenantID forKey:@"tenantMark"];
+        
+        //useAppCanEMMTenantID
+        
+        ASIFormDataRequest *request = [[ASIFormDataRequest alloc] initWithURL:requestUrl];
+        [request setRequestMethod:@"POST"];
+        [request setRequestHeaders:headerDict];
+        [request setPostBody:(NSMutableData *)[[bodyDict JSONFragment] dataUsingEncoding:NSUTF8StringEncoding]];
+        
+        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->reportPushBadge-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
+        
+        //[request setPostValue:appid forKey:@"x-mas-app-id"];
+        //[request setPostValue:appkey forKey:@"x-mas-app-key"];
+        //[request setPostValue:@"1" forKey:@"count"];
+        //[request setPostValue:deviceToken forKey:@"deviceToken"];
+        
+        [request setTimeOutSeconds:60];
+        [request setCompletionBlock:^{
+            
+            if (200 == request.responseStatusCode) {
+                
+                NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->reportPushBadge-->request.responseString is %@",request.responseString);
+                
+                
+            } else {
+                
+                NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->reportPushBadge-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
+                
+            }
+        }];
+        [request setFailedBlock:^{
+            
+            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->reportPushBadge-->setFailedBlock-->error is %@",[request error]);
+            
+        }];
+        
+        [request startAsynchronous];
+        [request release];
+    }
+}
+
+
+-(void)clearPushBadge:(id)userInfo {
+    
+    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->clearPushBadge");
     
     @autoreleasepool {
         
@@ -1514,7 +1626,7 @@ NSString *AppCanJS = nil;
             
             urlStr =[NSString stringWithFormat:@"%@4.0/count/%@",theApp.useBindUserPushURL, [dict objectForKey:@"taskId"]];
         }
-        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->sendReportRead-->urlStr = %@",urlStr);
+        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->clearPushBadge-->urlStr = %@",urlStr);
         
         NSURL *requestUrl = [NSURL URLWithString:urlStr];
         
@@ -1526,7 +1638,6 @@ NSString *AppCanJS = nil;
             
             appkey = @"";
         }
-        
         
         NSString *deviceToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"];
         
@@ -1542,12 +1653,12 @@ NSString *AppCanJS = nil;
             tenantId = [NSString stringWithFormat:@"%@", [dict objectForKey:@"tenantId"]];
         }
         
-       // NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->appid = %@-->appkey = %@-->deviceToken = %@-->tenantId = %@",appid, appkey, deviceToken, tenantId);
+        // NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->appid = %@-->appkey = %@-->deviceToken = %@-->tenantId = %@",appid, appkey, deviceToken, tenantId);
         
         NSTimeInterval time = [[NSDate date]timeIntervalSince1970];
         
         NSString *varifyAppStr = [BUtility getVarifyAppMd5Code:appid AppKey:appkey time:time];
-         NSString *softToken = [EUtility md5SoftToken];
+        NSString *softToken = [EUtility md5SoftToken];
         
         NSMutableDictionary *headerDict = [NSMutableDictionary dictionaryWithObject:varifyAppStr forKey:@"appverify"];
         [headerDict setObject:@"application/json" forKey:@"Content-Type"];
@@ -1578,7 +1689,7 @@ NSString *AppCanJS = nil;
         [request setRequestHeaders:headerDict];
         [request setPostBody:(NSMutableData *)[[bodyDict JSONFragment] dataUsingEncoding:NSUTF8StringEncoding]];
         
-        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
+        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->clearPushBadge-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
         
         //[request setPostValue:appid forKey:@"x-mas-app-id"];
         //[request setPostValue:appkey forKey:@"x-mas-app-key"];
@@ -1590,18 +1701,18 @@ NSString *AppCanJS = nil;
             
             if (200 == request.responseStatusCode) {
                 
-                NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->request.responseString is %@",request.responseString);
+                NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->clearPushBadge-->request.responseString is %@",request.responseString);
                 
                 
             } else {
                 
-                NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
+                NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->clearPushBadge-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
                 
             }
         }];
         [request setFailedBlock:^{
             
-            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->setFailedBlock-->error is %@",[request error]);
+            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->clearPushBadge-->setFailedBlock-->error is %@",[request error]);
             
         }];
         

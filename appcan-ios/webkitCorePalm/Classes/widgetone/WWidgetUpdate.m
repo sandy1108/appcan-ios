@@ -207,8 +207,7 @@
 //
 -(void)requestFinished:(ASIHTTPRequest *)request{
 	ACENSLog(@"requestFinished");
-    //记录ID 下次登录解压
-    NSLog(@"uniqueID=%@",uniqueId);
+      NSLog(@"uniqueID=%@",uniqueId);
     [[NSUserDefaults standardUserDefaults] setObject:uniqueId forKey:F_UD_UpdateWgtID];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -338,10 +337,10 @@
 //unzip
 - (BOOL)unZipUpdateWgt:(NSString *)inWgtName {
     
-	ZipArchive *zipObj = [[[ZipArchive alloc] init] autorelease];
+    ZipArchive *zipObj = [[[ZipArchive alloc] init] autorelease];
     NSFileManager * fileMgr = [NSFileManager defaultManager];
     
-	NSString *sourceWgt = inWgtName;
+    NSString *sourceWgt = inWgtName;
     
     NSString *outPath = nil;
     
@@ -353,6 +352,7 @@
     
     NSString * tempFolder = [[[NSUUID UUID] UUIDString] lowercaseString];
     NSString * tempFolderPath = [BUtility getDocumentsPath:tempFolder];
+    
     [fileMgr createDirectoryAtPath:tempFolderPath withIntermediateDirectories:YES attributes:nil error:nil];//创建临时目录做文件中转
     
     if ([zipObj UnzipOpenFile:sourceWgt] && [zipObj UnzipFileTo:tempFolderPath overWrite:YES] && [zipObj UnzipCloseFile]) {//解压到临时目录
@@ -362,10 +362,15 @@
         if ([fileList containsObject:@"widget"] && [fileList containsObject:@"plugin"]) {//新版本的补丁包
             NSString * widgetPath = [tempFolderPath stringByAppendingPathComponent:@"widget/"];
             NSArray * widgetPathFolderList = [fileMgr contentsOfDirectoryAtPath:widgetPath error:nil];
+            
             widgetPath = [widgetPath stringByAppendingPathComponent:[widgetPathFolderList firstObject]];
+            
             ACENSLog(@"新版本的补丁包:\n%@\n%@\n%@",widgetPath,outPath);
+            
             if ([self copyItemsFromPath:widgetPath toPath:outPath]) {
+                
                 NSLog(@"=====新版本的补丁包=====:\n%@\n%@",widgetPath,outPath);
+                
                 [fileMgr removeItemAtPath:tempFolderPath error:nil];
                 [fileMgr removeItemAtPath:sourceWgt error:nil];
                 return YES;
