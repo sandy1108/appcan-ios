@@ -110,6 +110,7 @@ static NSString *AppCanEngineJavaScriptCoreBaseJS;
                                @"evaluateMultiPopoverScript":ACE_METHOD_ASYNC,
                                @"pageForward":ACE_METHOD_ASYNC,
                                @"pageBack":ACE_METHOD_ASYNC,
+                               @"pageGoBack":ACE_METHOD_ASYNC,
                                @"reload":ACE_METHOD_ASYNC,
                                @"alert":ACE_METHOD_ASYNC,
                                @"confirm":ACE_METHOD_ASYNC,

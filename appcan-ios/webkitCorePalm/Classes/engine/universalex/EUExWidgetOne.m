@@ -228,7 +228,11 @@
 	}
 
 }
--(void)setBadgeNumber:(NSMutableArray*)inArguments{
+
+- (void)setBadgeNumber:(NSMutableArray*)inArguments{
+    
+    NSLog(@"appcan-->Engine-->EUExWidgetOne-->setBadgeNumber-->inArguments = %@",inArguments);
+    
     int number =[[inArguments objectAtIndex:0] intValue];
     NSUserDefaults *ud =[NSUserDefaults standardUserDefaults];
     [ud removeObjectForKey:F_UD_BadgeNumber];

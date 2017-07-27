@@ -617,8 +617,11 @@ const CGFloat loadingVisibleHeight = 60.0f;
 }
 
 - (void)reuseWithFrame:(CGRect)frame BrwCtrler:(EBrowserController*)eInBrwCtrler Wgt:(WWidget*)inWgt BrwWnd:(EBrowserWindow*)eInBrwWnd UExObjName:(NSString*)inUExObjName Type:(int)inWndType  BrwView:(EBrowserView *)BrwView{
-    self.frame = CGRectMake(0.0, 0.0, frame.size.width, frame.size.height);
     
+    self.frame = CGRectMake(0.0, 0.0, frame.size.width, frame.size.height);
+    //这个参数的默认值为YES
+    self.swipeCallbackEnabled = YES;
+    NSLog(@"appcan-->ACEBrowserView.m-->self.swipeCallbackEnabled");
     UIActivityIndicatorView * indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     [indicator setCenter:CGPointMake([BUtility getScreenWidth]/2, [BUtility getScreenHeight]/2)];
     if ([[[UIDevice currentDevice] systemVersion] floatValue]>=5.0)
