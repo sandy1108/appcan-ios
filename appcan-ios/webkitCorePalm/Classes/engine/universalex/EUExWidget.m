@@ -1101,6 +1101,16 @@ result;\
     
     NSLog(@"appcan-->AppCanEngine-->EUExWidget.m.m-->sendReportRead-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
     
+    if (theApp.validatesSecureCertificate) {
+        
+        [request setValidatesSecureCertificate:YES];
+        
+    } else {
+        
+        [request setValidatesSecureCertificate:NO];
+        
+    }
+    
     [request setTimeOutSeconds:60];
     @weakify(request)
     
@@ -1227,20 +1237,22 @@ result;\
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *deviceToken = [defaults objectForKey:@"deviceToken"];
     //deviceToken = @"29d68bac 42b117d8 414510e2 b57d9be3 a7088878 c6970b89 59ff2335 0a53250e";
-    NSLog(@"uid=%@, unickName=%@,deviceToken=%@",uId,uNickName,deviceToken);
+    NSLog(@"appcan-->AppCanEngine-->setPushInfo===>uid=%@, unickName=%@,deviceToken=%@",uId,uNickName,deviceToken);
     
     if (deviceToken && ![deviceToken isEqualToString:@"(null)"]) {
         
         NSDictionary *userDict = [NSDictionary dictionaryWithObjectsAndKeys:uId,@"uId",uNickName,@"uNickName",deviceToken,@"deviceToken", nil];
         
         [NSThread detachNewThreadSelector:@selector(sendPushUserMsg:) toTarget:self withObject:(id)userDict];
+    }else{
+        NSLog(@"appcan-->AppCanEngine-->setPushInfo===>deviceToken is null, report cancelled!");
     }
     
 }
 
 - (void)delPushInfo:(NSMutableArray *)inArguments {
 
-    NSLog(@"appcan-->AppCanEngine-->EUExWidget-->delPushInfo-->");
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget-->delPushInfo-->inArguments == %@",inArguments);
 
     if ([theApp.useBindUserPushURL rangeOfString:@"push"].location == NSNotFound) {
         
@@ -1285,6 +1297,16 @@ result;\
         //requestSetPushInfo = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:urlStr]];
         
         NSLog(@"appcan-->Engine-->EUExWidget.m-->delPushInfo-->headerDict = %@-->body = %@",headerDict,paramDict);
+        
+        if (theApp.validatesSecureCertificate) {
+            
+            [requestSetPushInfo setValidatesSecureCertificate:YES];
+            
+        } else {
+            
+            [requestSetPushInfo setValidatesSecureCertificate:NO];
+            
+        }
         
         [requestSetPushInfo setRequestMethod:@"POST"];
         [requestSetPushInfo setRequestHeaders:headerDict];
