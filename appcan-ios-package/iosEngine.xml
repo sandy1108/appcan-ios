@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <info>
-    <version>sdksuit_3.2_160923_14</version>
-    <package>ios_Engine_3.2_160923_14</package>
-    <description>推送角标,打开数上报,绑定功能,动画,协议路径OA,swipeCallbackEnabled默认为YES,加密解密</description>
+    <version>sdksuit_3.2_170728_01</version>
+    <package>ios_Engine_3.2_170728_01</package>
+    <description>修复delPushInfo以及count角标数上报中校验https证书开关未生效的问题</description>
 </info>
