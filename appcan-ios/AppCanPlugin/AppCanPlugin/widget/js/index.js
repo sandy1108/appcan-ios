@@ -10,6 +10,10 @@ function getDeviceID(){
     }
 }
 
+function startPushDemo(){
+    uexWindow.open("pushDemo", '0', "PushDemo.html", '0', '', '', 0);
+}
+
 window.uexOnload = function (type) {
 
     uexWidget.onLoadByOtherApp = onLoadByOtherApp;
