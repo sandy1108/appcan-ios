@@ -1689,6 +1689,16 @@ NSString *AppCanJS = nil;
         [request setRequestHeaders:headerDict];
         [request setPostBody:(NSMutableData *)[[bodyDict JSONFragment] dataUsingEncoding:NSUTF8StringEncoding]];
         
+        if (theApp.validatesSecureCertificate) {
+            
+            [request setValidatesSecureCertificate:YES];
+            
+        } else {
+            
+            [request setValidatesSecureCertificate:NO];
+            
+        }
+        
         NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->clearPushBadge-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
         
         //[request setPostValue:appid forKey:@"x-mas-app-id"];
