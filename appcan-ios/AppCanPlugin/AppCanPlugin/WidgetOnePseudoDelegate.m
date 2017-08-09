@@ -35,7 +35,7 @@
         self.useUpdateWgtHtmlControl = NO;
         self.useStartReportURL = @"http://192.168.1.140:8080/dc/";
         self.useAnalysisDataURL = @"http://192.168.1.140:8080/dc/";
-        self.useBindUserPushURL = @"http://192.168.1.140:8080/push/";
+        self.useBindUserPushURL = @"https://eco.appcan.cn/gateway/";
         self.useAppCanMAMURL = @"http://192.168.1.140:8080/mam/";
         self.useAppCanMCMURL = @"http://192.168.1.183:8443/mcmIn/";
         self.useAppCanMDMURL = @"http://192.168.1.183:8443/mdmIn/";
