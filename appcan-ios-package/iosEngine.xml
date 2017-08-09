@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <info>
-    <version>sdksuit_3.2_170803_01_e</version>
-    <package>ios_Engine_3.2_170803_01_e</package>
-    <description>修复delPushInfo以及count角标数上报中校验https证书开关未生效的问题</description>
+    <version>sdksuit_3.2_170809_01_e</version>
+    <package>ios_Engine_3.2_170809_01_e</package>
+    <description>屏蔽了第三方页面中额外跳转了一些未知协议路径，防止不应该的错误页面跳转</description>
 </info>

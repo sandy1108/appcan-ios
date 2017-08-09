@@ -163,6 +163,10 @@ const float AppCanFinalProgressValue = 0.9f;
 				}
 			}
 		}
+        if (![[requestURL scheme].lowercaseString isEqualToString:@"http"]&&![[requestURL scheme].lowercaseString isEqualToString:@"https"]&&![[requestURL scheme].lowercaseString isEqualToString:@"file"]) {
+            NSLog(@"AppCan3.0===>CBrowserWindow===>shouldStartLoadWithRequest===>Request scheme is not allowed: %@", [requestURL scheme]);
+            return NO;
+        }
 		BOOL isFrame = ![[[request URL] absoluteString] isEqualToString:[[request mainDocumentURL] absoluteString]];
 		if (!isFrame) {
 			//[self flushCommandQueue:eBrwView];
