@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <info>
-    <version>sdksuit_3.2_170814_01_e</version>
-    <package>ios_Engine_3.2_170814_01_e</package>
-    <description>修复widget包更新时，兼容热修复的逻辑中未建立父级目录导致崩溃的问题</description>
+    <version>sdksuit_3.2_170824_01_e</version>
+    <package>ios_Engine_3.2_170824_01_e</package>
+    <description>修改IPHONEOS_DEPLOYMENT_TARGET = 8.0</description>
 </info>
