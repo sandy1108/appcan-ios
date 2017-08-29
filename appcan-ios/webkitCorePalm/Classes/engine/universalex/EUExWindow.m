@@ -3724,6 +3724,10 @@ typedef NS_ENUM(NSInteger,ACEDisturbLongPressGestureStatus){
     NSString *inType = [inArguments objectAtIndex:0];
     NSString *inPos = [inArguments objectAtIndex:1];
     NSString *inMsg = [inArguments objectAtIndex:2];
+    
+    if (![inMsg isKindOfClass:[NSString class]]) {
+        inMsg = @"";
+    }
     NSString *inDuration = [inArguments objectAtIndex:3];
     EBrowserWindow *eBrwWnd = (EBrowserWindow*)meBrwView.meBrwWnd;
     float wndWidth = eBrwWnd.bounds.size.width;
@@ -3750,9 +3754,11 @@ typedef NS_ENUM(NSInteger,ACEDisturbLongPressGestureStatus){
     toastViewRect = [BToastView viewRectWithPos:pos wndWidth:wndWidth wndHeight:wndHeight];
     mToastView = [[BToastView alloc]initWithFrame:toastViewRect Type:type Pos:pos];
     mToastView.mTextView.text = inMsg;
+    
     [eBrwWnd addSubview:mToastView];
     
     float duration = [inDuration floatValue];
+    
     if (duration > 0) {
         float fDuration = duration / 1000;
         mToastTimer = [NSTimer scheduledTimerWithTimeInterval:fDuration target:self selector:@selector(closeToast:) userInfo:nil repeats:NO];

@@ -123,11 +123,24 @@ const float AppCanFinalProgressValue = 0.9f;
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     if (webView != NULL) {
-        ACENSLog(@"didFailLoadWithError url is %@", [webView.request URL]);
-        ACENSLog(@"page loaded failed! Error - %@ %@",[error localizedDescription],[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]);
-        ACEBrowserView *aceWebView = (ACEBrowserView *)webView;
-        [aceWebView notifyPageError];
-        [aceWebView continueMultiPopoverLoading];
+        
+        NSLog(@"didFailLoadWithError url is %@", [webView.request URL]);
+        NSLog(@"page loaded failed! Error - %@ %@",[error localizedDescription],[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]);
+        
+        [((ACEBrowserView *)webView) notifyPageError];
+        [((ACEBrowserView *)webView) continueMultiPopoverLoading];
+        NSURLRequest *request = webView.request;
+        
+        BOOL isFrame = ![[[request URL] absoluteString] isEqualToString:[[request mainDocumentURL] absoluteString]];
+        if (!isFrame) {
+            NSString *errorPath = [self errorHTMLPath];
+            NSURL *errorURL = [BUtility stringToUrl:errorPath];
+            if(![webView.request.URL.path isEqual:errorPath]){
+                [((ACEBrowserView *)webView) loadWithUrl:errorURL];
+            }
+        }
+        
+        
         
         [self webView:webView didFailLoadWithErrorOption:error];
         
@@ -150,6 +163,10 @@ const float AppCanFinalProgressValue = 0.9f;
 				}
 			}
 		}
+        if (![[requestURL scheme].lowercaseString isEqualToString:@"http"]&&![[requestURL scheme].lowercaseString isEqualToString:@"https"]&&![[requestURL scheme].lowercaseString isEqualToString:@"file"]) {
+            NSLog(@"AppCan3.0===>CBrowserWindow===>shouldStartLoadWithRequest===>Request scheme is not allowed: %@", [requestURL scheme]);
+            return NO;
+        }
 		BOOL isFrame = ![[[request URL] absoluteString] isEqualToString:[[request mainDocumentURL] absoluteString]];
 		if (!isFrame) {
 			//[self flushCommandQueue:eBrwView];

@@ -399,7 +399,7 @@ result;\
             
             
         }
-        
+        NSLog(@"appcan-->Engine-->EUExWidget-->startWidget-->%@",inArguments);
         Class analysisClass =  NSClassFromString(@"AppCanAnalysis");
         
         if (analysisClass) {
@@ -534,15 +534,19 @@ result;\
     
     if (inRet && inRet.length != 0) {
         
-        if (eBrwWndContainer.mOpenerForRet) {
-            
-            NSString *jsStr = [NSString stringWithFormat:@"if(%@!=null){%@('%@');}",eBrwWndContainer.mOpenerForRet,eBrwWndContainer.mOpenerForRet,inRet];
-            
-            [[eBrwWndContainer.meOpenerContainer aboveWindow].meBrwView stringByEvaluatingJavaScriptFromString:jsStr];
-            
-        }
+    } else {
+        
+        inRet = @"";
+    }
+    
+    if (eBrwWndContainer.mOpenerForRet) {
+        
+        NSString *jsStr = [NSString stringWithFormat:@"if(%@!=null){%@('%@');}",eBrwWndContainer.mOpenerForRet,eBrwWndContainer.mOpenerForRet,inRet];
+        
+        [[eBrwWndContainer.meOpenerContainer aboveWindow].meBrwView stringByEvaluatingJavaScriptFromString:jsStr];
         
     }
+
     
     if (appID) {
         
@@ -1033,7 +1037,7 @@ result;\
         
         urlString =[NSString stringWithFormat:@"%@4.0/count/%@",theApp.useBindUserPushURL, [dictionary objectForKey:@"taskId"]];
     }
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->-->sendReportRead-->urlStr = %@",urlString);
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->-->sendReportRead-->urlStr = %@",urlString);
     
     NSURL *url = [NSURL URLWithString:urlString];
     
@@ -1061,7 +1065,7 @@ result;\
         tenantId = [NSString stringWithFormat:@"%@", [dictionary objectForKey:@"tenantId"]];
     }
     
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->appid = %@-->appkey = %@-->deviceToken = %@-->tenantId = %@",appid, appkey, deviceToken, tenantId);
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->appid = %@-->appkey = %@-->deviceToken = %@-->tenantId = %@",appid, appkey, deviceToken, tenantId);
     
     NSTimeInterval time = [[NSDate date]timeIntervalSince1970];
     
@@ -1095,7 +1099,17 @@ result;\
     [request setRequestHeaders:headerDict];
     [request setPostBody:(NSMutableData *)[[bodyDict JSONFragment] dataUsingEncoding:NSUTF8StringEncoding]];
     
-    NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget.m.m-->sendReportRead-->headerDict = %@-->bodyDict = %@",headerDict, bodyDict);
+    
+    if (theApp.validatesSecureCertificate) {
+        
+        [request setValidatesSecureCertificate:YES];
+        
+    } else {
+        
+        [request setValidatesSecureCertificate:NO];
+        
+    }
     
     [request setTimeOutSeconds:60];
     @weakify(request)
@@ -1106,12 +1120,12 @@ result;\
         
         if (200 == request.responseStatusCode) {
             
-            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->request.responseString is %@",request.responseString);
+            NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->request.responseString is %@",request.responseString);
             
             
         } else {
             
-            NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
+            NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->request.responseStatusCode is %d--->[request error] = %@",request.responseStatusCode, [request error]);
             
         }
     }];
@@ -1119,7 +1133,7 @@ result;\
         
         @strongify(request);
         
-        NSLog(@"appcan-->AppCanEngine-->WidgetOneDelegate.m-->sendReportRead-->setFailedBlock-->error is %@",[request error]);
+        NSLog(@"appcan-->AppCanEngine-->EUExWidget.m-->sendReportRead-->setFailedBlock-->error is %@",[request error]);
         
     }];
     
@@ -1222,21 +1236,23 @@ result;\
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *deviceToken = [defaults objectForKey:@"deviceToken"];
-    
     //deviceToken = @"29d68bac 42b117d8 414510e2 b57d9be3 a7088878 c6970b89 59ff2335 0a53250e";
-    
-    NSLog(@"uid=%@, unickName=%@,deviceToken=%@",uId,uNickName,deviceToken);
+    NSLog(@"appcan-->AppCanEngine-->setPushInfo===>uid=%@, unickName=%@,deviceToken=%@",uId,uNickName,deviceToken);
     
     if (deviceToken && ![deviceToken isEqualToString:@"(null)"]) {
         
         NSDictionary *userDict = [NSDictionary dictionaryWithObjectsAndKeys:uId,@"uId",uNickName,@"uNickName",deviceToken,@"deviceToken", nil];
         
         [NSThread detachNewThreadSelector:@selector(sendPushUserMsg:) toTarget:self withObject:(id)userDict];
+    }else{
+        NSLog(@"appcan-->AppCanEngine-->setPushInfo===>deviceToken is null, report cancelled!");
     }
     
 }
 
 - (void)delPushInfo:(NSMutableArray *)inArguments {
+
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget-->delPushInfo-->inArguments == %@",inArguments);
 
     if ([theApp.useBindUserPushURL rangeOfString:@"push"].location == NSNotFound) {
         
@@ -1262,6 +1278,7 @@ result;\
         //设备标识 deviceToken
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         NSString *deviceToken = [defaults objectForKey:@"deviceToken"];
+        NSString *softToken = [EUtility md5SoftToken];
         
         if (deviceToken && ![deviceToken isEqualToString:@"(null)"]) {
             
@@ -1270,17 +1287,34 @@ result;\
             //29d68bac 42b117d8 414510e2 b57d9be3 a7088878 c6970b89 59ff2335 0a53250e
             deviceToken = @"";
         }
+        //租户标识
+        NSString *tenantMark = [EUtility getTenantIdentifier];
         
         [paramDict setObject:deviceToken forKey:@"deviceToken"];
-        
+        [paramDict setObject:softToken forKey:@"softToken"];
         [paramDict setObject:userDict forKey:@"user"];
-        
-        NSString* urlStr = [NSString stringWithFormat:@"%@4.0/installations",theApp.useBindUserPushURL];
+        //新增请求来源和请求类型字段，以便后端跟踪问题
+        [paramDict setObject:@"iOS-Engine" forKey:@"from"];
+        [paramDict setObject:@"unbind" forKey:@"requestType"];
+        [paramDict setObject:tenantMark forKey:@"tenantMark"];
+        //注册地址变更
+        NSString *accessBindUserPushURL = [theApp.useBindUserPushURL stringByReplacingOccurrencesOfString:@"gateway" withString:@"access"];
+        NSString* urlStr = [NSString stringWithFormat:@"%@4.0/installations", accessBindUserPushURL];
         
         ASIFormDataRequest *requestSetPushInfo = [[ASIFormDataRequest alloc] initWithURL:[NSURL URLWithString:urlStr]];
         //requestSetPushInfo = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:urlStr]];
         
         NSLog(@"appcan-->Engine-->EUExWidget.m-->delPushInfo-->headerDict = %@-->body = %@",headerDict,paramDict);
+        
+        if (theApp.validatesSecureCertificate) {
+            
+            [requestSetPushInfo setValidatesSecureCertificate:YES];
+            
+        } else {
+            
+            [requestSetPushInfo setValidatesSecureCertificate:NO];
+            
+        }
         
         [requestSetPushInfo setRequestMethod:@"POST"];
         [requestSetPushInfo setRequestHeaders:headerDict];
@@ -1365,8 +1399,10 @@ result;\
         NSMutableDictionary *paramDict = [NSMutableDictionary dictionaryWithCapacity:5];
         
         //user信息
-        [userDict setObject:[dict objectForKey:@"uId"] forKey:@"userId"];
-        [userDict setObject:[dict objectForKey:@"uNickName"] forKey:@"username"];
+        NSString *uId = [dict objectForKey:@"uId"];
+        NSString *uNickName = [dict objectForKey:@"uNickName"];
+        [userDict setObject:uId forKey:@"userId"];
+        [userDict setObject:uNickName forKey:@"username"];
         
         //请求头信息
         [headerDict setObject:@"text/plain;charset=UTF-8" forKey:@"Content-Type"];
@@ -1381,6 +1417,8 @@ result;\
         //设备版本
         //NSString *appOS = [[UIDevice currentDevice] systemVersion];
         
+        //租户标识
+        NSString *tenantMark = [EUtility getTenantIdentifier];
         //设备标识 deviceToken
         NSString *deviceToken = [dict objectForKey:@"deviceToken"];
         
@@ -1390,8 +1428,18 @@ result;\
         [paramDict setObject:userDict forKey:@"user"];
         
         NSLog(@"appcan-->Engine-->EUExWidget.m-->sendPushUserMsg-->headerDict = %@-->body = %@",headerDict,paramDict);
-        
-        urlStr = [NSString stringWithFormat:@"%@4.0/installations",theApp.useBindUserPushURL];
+        //新增请求来源和请求类型字段，以便后端跟踪问题
+        [paramDict setObject:@"iOS-Engine" forKey:@"from"];
+        if((uId == nil || [uId length] == 0) && (uNickName == nil || [uNickName length] == 0)){
+            //未传入用户信息，认为是推送注册上报
+            [paramDict setObject:@"startUp" forKey:@"requestType"];
+        }else{
+            [paramDict setObject:@"bindUser" forKey:@"requestType"];
+        }
+        [paramDict setObject:tenantMark forKey:@"tenantMark"];
+        //注册地址变更
+        NSString *accessBindUserPushURL = [theApp.useBindUserPushURL stringByReplacingOccurrencesOfString:@"gateway" withString:@"access"];
+        urlStr = [NSString stringWithFormat:@"%@4.0/installations", accessBindUserPushURL];
         
         ASIHTTPRequest *requestSetPushInfo = [[ASIFormDataRequest alloc] initWithURL:[NSURL URLWithString:urlStr]];
         //requestSetPushInfo = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:urlStr]];
@@ -1490,10 +1538,13 @@ result;\
 
 
 - (void)setPushState:(NSMutableArray*)inArguments {
-    
+    NSLog(@"appcan-->AppCanEngine-->EUExWidget-->setPushState-->inArguments = %@",inArguments);
+
     int isPush =[[inArguments objectAtIndex:0] intValue];
-    ACENSLog(@"isPush=%d",isPush);
+    NSLog(@"isPush=%d",isPush);
+    
     [BUtility writeLog:[NSString stringWithFormat:@"-----setPushState------>>,theApp.usePushControl==%d",theApp.usePushControl]];
+    
     if(theApp.usePushControl == NO) {
         
         return;
@@ -1511,8 +1562,7 @@ result;\
         }else{
             [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeSound)];
         }
-    }
-    else {
+    } else {
         [[UIApplication sharedApplication] unregisterForRemoteNotifications];
     }
 }
@@ -1612,6 +1662,10 @@ result;\
 - (void)getPushHost:(NSMutableArray *)inArguments {
     
     [self jsSuccessWithName:@"uexWidget.cbGetPushHost" opId:0 dataType:UEX_CALLBACK_DATATYPE_TEXT strData:theApp.useBindUserPushURL];
+    
+}
+
+- (void)setPushBadge:(NSMutableArray *)inArguments {
     
 }
 @end
