@@ -25,6 +25,7 @@
 		42FFC8021B625EC60058E363 /* PackageInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 42FFC8011B625EC60058E363 /* PackageInfo.m */; };
 		42FFEF421C200F9400294DE1 /* Ono.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42FFEF411C200F9400294DE1 /* Ono.framework */; };
 		46D6D7B416F1CB3800D8E883 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46D6D7B316F1CB3800D8E883 /* StoreKit.framework */; };
+		693B8CFB1F58F7C500235694 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69E5365B1F580EB500DC0C71 /* UserNotifications.framework */; };
 		6CC6033A157DCC0F00A3E13E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CC60339157DCC0F00A3E13E /* CoreGraphics.framework */; };
 		6CC60340157DCC0F00A3E13E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6CC6033E157DCC0F00A3E13E /* InfoPlist.strings */; };
 		6CC60342157DCC0F00A3E13E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 6CC60341157DCC0F00A3E13E /* main.m */; };
@@ -133,6 +134,7 @@
 		42FFC8011B625EC60058E363 /* PackageInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PackageInfo.m; sourceTree = "<group>"; };
 		42FFEF411C200F9400294DE1 /* Ono.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Ono.framework; sourceTree = "<group>"; };
 		46D6D7B316F1CB3800D8E883 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		69E5365B1F580EB500DC0C71 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		6C9017BD159992B90034AA19 /* CDataScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner.h; sourceTree = "<group>"; };
 		6C9017BF159992B90034AA19 /* CDataScanner_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner_Extensions.h; sourceTree = "<group>"; };
 		6C9017C0159992B90034AA19 /* NSCharacterSet_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSCharacterSet_Extensions.h; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				693B8CFB1F58F7C500235694 /* UserNotifications.framework in Frameworks */,
 				E830DC9C1F29FB1900C83EBA /* libAppCanEngine.a in Frameworks */,
 				42F6E8E41C5749E70073C6E0 /* JavaScriptCore.framework in Frameworks */,
 				420041951BABCD80000A57F5 /* libz.tbd in Frameworks */,
@@ -321,6 +324,7 @@
 		6CC60334157DCC0F00A3E13E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				69E5365B1F580EB500DC0C71 /* UserNotifications.framework */,
 				42F6E8E31C5749E70073C6E0 /* JavaScriptCore.framework */,
 				420041941BABCD80000A57F5 /* libz.tbd */,
 				420041921BABCD79000A57F5 /* libxml2.tbd */,
@@ -671,6 +675,7 @@
 					"\"$(SRCROOT)/AppCanPlugin/uexFrameworks\"",
 					"$(PROJECT_DIR)/AppCanPlugin/engine",
 					"$(PROJECT_DIR)/AppCanPlugin/uexFrameworks",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AppCanPlugin/AppCanPlugin-Prefix.pch";
@@ -709,6 +714,7 @@
 					"\"$(SRCROOT)/AppCanPlugin/uexFrameworks\"",
 					"$(PROJECT_DIR)/AppCanPlugin/engine",
 					"$(PROJECT_DIR)/AppCanPlugin/uexFrameworks",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AppCanPlugin/AppCanPlugin-Prefix.pch";
@@ -769,6 +775,7 @@
 					"\"$(SRCROOT)/AppCanPlugin/uexFrameworks\"",
 					"$(PROJECT_DIR)/AppCanPlugin/engine",
 					"$(PROJECT_DIR)/AppCanPlugin/uexFrameworks",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AppCanPlugin/AppCanPlugin-Prefix.pch";
