@@ -1295,6 +1295,7 @@
 		5AAA868118B1B93D000D7600 /* WWidgetUpdate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WWidgetUpdate.m; sourceTree = "<group>"; };
 		5AAA868218B1B93D000D7600 /* WidgetOnePseudoDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetOnePseudoDelegate.h; sourceTree = "<group>"; };
 		5AE8735618B74DD20040BC9A /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		69E536621F582E0F00DC0C71 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		76F105BC1BD0913F0064CDD1 /* DataAnalysisInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataAnalysisInfo.h; sourceTree = "<group>"; };
 		76F105BD1BD0913F0064CDD1 /* DataAnalysisInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataAnalysisInfo.m; sourceTree = "<group>"; };
 		B220D27415A3152B00D02138 /* libAppCanEngine.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAppCanEngine.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2006,6 +2007,7 @@
 		B220D27615A3152B00D02138 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				69E536621F582E0F00DC0C71 /* UserNotifications.framework */,
 				42FFEF391C1FF86200294DE1 /* libxml2.tbd */,
 				42CF214C1C19070F00F539B4 /* libsqlite3.tbd */,
 				42CF214A1C1906E100F539B4 /* ImageIO.framework */,
@@ -3371,6 +3373,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SRCROOT)/../webkitCorePalm/Classes/plugin",
 					"$(inherited)",
+					"$(PROJECT_DIR)/AppCanEngine",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AppCanEngine/AppCanEngine-Prefix.pch";
@@ -3402,6 +3405,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SRCROOT)/../webkitCorePalm/Classes/plugin",
 					"$(inherited)",
+					"$(PROJECT_DIR)/AppCanEngine",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AppCanEngine/AppCanEngine-Prefix.pch";
