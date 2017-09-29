@@ -499,7 +499,11 @@ NSString *AppCanJS = nil;
             [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
                 if (granted) {
                     // 点击允许
-                    NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->注册UNUserNotificationCenter成功");
+                    NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->UNUserNotificationCenter获取权限成功");
+                    
+                    //注册推送
+                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                    
                     [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
                         NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->settings=%@", settings);
                     }];
@@ -675,7 +679,7 @@ NSString *AppCanJS = nil;
         
         Class acecls = NSClassFromString(fullClassName);
         
-        Method delegateMethod = class_getClassMethod(acecls, @selector(application:didFinishLaunchingWithOptions:));
+        Method delegateMethod = class_getClassMethod(acecls, @selector(userNotificationCenter:willPresentNotification:withCompletionHandler:));
         
         if (delegateMethod) {
             
@@ -739,7 +743,7 @@ NSString *AppCanJS = nil;
         
         Class acecls = NSClassFromString(fullClassName);
         
-        Method delegateMethod = class_getClassMethod(acecls, @selector(application:didFinishLaunchingWithOptions:));
+        Method delegateMethod = class_getClassMethod(acecls, @selector(userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:));
         
         if (delegateMethod) {
             
