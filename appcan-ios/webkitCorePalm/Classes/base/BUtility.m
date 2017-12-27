@@ -531,12 +531,26 @@ static NSString *clientCertificatePwd = nil;
 
 + (NSURL*)stringToUrl:(NSString*)inString {
 	
-    NSRange range = [inString rangeOfString:@"#"];
+//    NSRange range = [inString rangeOfString:@"#"];
+//    
+//    if (range.location != NSNotFound) {
+//        
+//        inString = [inString substringToIndex:range.location];
+//        
+//    }
     
-    if (range.location != NSNotFound) {
-        
-        inString = [inString substringToIndex:range.location];
-        
+    if ([inString length]) {
+        NSString *temp = nil;
+        NSString *firstTemp = nil;
+        long getLength = [inString length];
+        for(long i = getLength-1; i > 0; i--)
+        {
+            temp = [inString substringWithRange:NSMakeRange(i, 1)];
+            firstTemp = [inString substringWithRange:NSMakeRange(i-1, 1)];
+            if ([temp isEqualToString:@"#"] && ![firstTemp isEqualToString:@"/"]) {
+                inString = [inString substringToIndex:i];
+            }
+        }
     }
     
     NSURL * url = nil;

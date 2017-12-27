@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <info>
-    <version>sdksuit_3.2_170928_01_e</version>
-    <package>ios_Engine_3.2_170928_01_e</package>
-    <description>修复新通知代理导致崩溃的问题</description>
+    <version>sdksuit_3.2_171115_01_e</version>
+    <package>ios_Engine_3.2_171115_01_e</package>
+    <description>openPopover方法兼容带锚点链接</description>
 </info>

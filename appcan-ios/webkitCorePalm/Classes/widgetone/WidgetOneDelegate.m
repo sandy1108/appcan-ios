@@ -492,21 +492,30 @@ NSString *AppCanJS = nil;
      [BUtility writeLog:[NSString stringWithFormat:@"-----didFinishLaunchingWithOptions------>>theApp.usePushControl==%d",theApp.usePushControl]];
     if(theApp.usePushControl == YES) {
         if (ACE_iOSVersion >= 10.0) {
+            
+            NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->iOS 10+设备");
+            
             //iOS10特有
             UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
             // 必须写代理，不然无法监听通知的接收与点击
             center.delegate = self;
+            
             [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
                 if (granted) {
                     // 点击允许
                     NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->UNUserNotificationCenter获取权限成功");
                     
-                    //注册推送
-                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                    // 主线程执行：
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->iOS 10+注册推送");
+                        //注册推送
+                        [[UIApplication sharedApplication] registerForRemoteNotifications];
+                    });
                     
-                    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
-                        NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->settings=%@", settings);
-                    }];
+//                    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+//                        NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->settings=%@", settings);
+//                    }];
+                    
                 } else {
                     // 点击不允许
                     NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->注册UNUserNotificationCenter失败");
