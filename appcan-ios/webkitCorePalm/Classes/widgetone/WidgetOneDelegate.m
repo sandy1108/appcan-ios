@@ -50,13 +50,16 @@
 #import "ACEPluginParser.h"
 #import "ACEJSCHandler.h"
 #import "ACEBrowserView.h"
+
+#import <UserNotifications/UserNotifications.h>
+
 #define kViewTagExit 100
 #define kViewTagLocalNotification 200
 
 #define ACE_USERAGENT @"AppCanUserAgent"
 
 
-@interface WidgetOneDelegate()<RESideMenuDelegate>
+@interface WidgetOneDelegate()<RESideMenuDelegate,UNUserNotificationCenterDelegate>
 
 @end
 
@@ -488,7 +491,38 @@ NSString *AppCanJS = nil;
     [window makeKeyAndVisible];
      [BUtility writeLog:[NSString stringWithFormat:@"-----didFinishLaunchingWithOptions------>>theApp.usePushControl==%d",theApp.usePushControl]];
     if(theApp.usePushControl == YES) {
-        if (ACE_iOSVersion >= 8.0)  {
+        if (ACE_iOSVersion >= 10.0) {
+            
+            NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->iOS 10+设备");
+            
+            //iOS10特有
+            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+            // 必须写代理，不然无法监听通知的接收与点击
+            center.delegate = self;
+            
+            [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                if (granted) {
+                    // 点击允许
+                    NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->UNUserNotificationCenter获取权限成功");
+                    
+                    // 主线程执行：
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->iOS 10+注册推送");
+                        //注册推送
+                        [[UIApplication sharedApplication] registerForRemoteNotifications];
+                    });
+                    
+//                    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+//                        NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->settings=%@", settings);
+//                    }];
+                    
+                } else {
+                    // 点击不允许
+                    NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->注册UNUserNotificationCenter失败");
+                }
+            }];
+            
+        } else if (ACE_iOSVersion >= 8.0)  {
             
 #ifdef __IPHONE_8_0
             NSLog(@"appcan-->Engine-->didFinishLaunchingWithOptions-->注册推送");
@@ -596,7 +630,140 @@ NSString *AppCanJS = nil;
     
 }
 
+#pragma mark - UNUserNotificationCenterDelegate
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler{
+    
+    NSDictionary * userInfo = notification.request.content.userInfo;
+    
+    NSUserDefaults *appStateUD = [NSUserDefaults standardUserDefaults];
+    
+    NSString *userData = [userInfo objectForKey:@"userInfo"];
+    //****************************
+    NSString * pushString = [userInfo JSONFragment];
+    if (pushString) {
+        
+        [appStateUD setObject:pushString forKey:@"allPushData"];
+    }
+    if (userData != nil || userInfo) {
+        
+        [appStateUD setObject:userData forKey:@"pushData"];
+        
+        EBrowserWindowContainer * aboveWindowContainer = [meBrwCtrler.meBrwMainFrm.meBrwWgtContainer aboveWindowContainer];
+        
+        if (aboveWindowContainer && [UIApplication sharedApplication].applicationState != UIApplicationStateBackground) {
+            
+            if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive) {
+                
+                [appStateUD setObject:@"2" forKey:@"appStateOfGetPushData"];
+                
+            } else {
+                
+                [appStateUD setObject:@"1" forKey:@"appStateOfGetPushData"];
+                
+            }
+            [appStateUD synchronize];
+            [aboveWindowContainer pushNotify];
+            
+        }
+        
+    }
+    
+    [self invokeAppDelegateMethodUserNotificationCenter:center willPresentNotification:(UNNotification *)notification
+                                  withCompletionHandler:completionHandler];
+    
+    completionHandler(UNNotificationPresentationOptionBadge);
+}
+
+- (void)invokeAppDelegateMethodUserNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler{
+    for (NSInteger i = 0; i < [pluginObj.classNameArray count]; i++) {
+        
+        NSString *className = [pluginObj.classNameArray objectAtIndex:i];
+        
+        NSString * fullClassName = [NSString stringWithFormat:@"EUEx%@", [className substringFromIndex:3]];
+        
+        Class acecls = NSClassFromString(fullClassName);
+        
+        Method delegateMethod = class_getClassMethod(acecls, @selector(userNotificationCenter:willPresentNotification:withCompletionHandler:));
+        
+        if (delegateMethod) {
+            
+            
+            [acecls userNotificationCenter:(UNUserNotificationCenter *)center
+                   willPresentNotification:(UNNotification *)notification
+                     withCompletionHandler:completionHandler];
+            
+        }
+    }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler{
+    
+    NSDictionary * userInfo = response.notification.request.content.userInfo;
+    
+    NSUserDefaults *appStateUD = [NSUserDefaults standardUserDefaults];
+    
+    NSString *userData = [userInfo objectForKey:@"userInfo"];
+    //****************************
+    NSString * pushString = [userInfo JSONFragment];
+    if (pushString) {
+        
+        [appStateUD setObject:pushString forKey:@"allPushData"];
+    }
+    if (userData != nil || userInfo) {
+        
+        [appStateUD setObject:userData forKey:@"pushData"];
+        
+        EBrowserWindowContainer * aboveWindowContainer = [meBrwCtrler.meBrwMainFrm.meBrwWgtContainer aboveWindowContainer];
+        
+        if (aboveWindowContainer && [UIApplication sharedApplication].applicationState != UIApplicationStateBackground) {
+            
+            if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive) {
+                
+                [appStateUD setObject:@"2" forKey:@"appStateOfGetPushData"];
+                
+            } else {
+                
+                [appStateUD setObject:@"1" forKey:@"appStateOfGetPushData"];
+                
+            }
+            [appStateUD synchronize];
+            [aboveWindowContainer pushNotify];
+            
+        }
+        
+    }
+    
+    [self invokeAppDelegateMethodUserNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:completionHandler];
+    
+    completionHandler();
+}
+
+- (void)invokeAppDelegateMethodUserNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)())completionHandler{
+    for (NSInteger i = 0; i < [pluginObj.classNameArray count]; i++) {
+        
+        NSString *className = [pluginObj.classNameArray objectAtIndex:i];
+        
+        NSString * fullClassName = [NSString stringWithFormat:@"EUEx%@", [className substringFromIndex:3]];
+        
+        Class acecls = NSClassFromString(fullClassName);
+        
+        Method delegateMethod = class_getClassMethod(acecls, @selector(userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:));
+        
+        if (delegateMethod) {
+            
+            
+            [acecls userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:completionHandler];
+            
+        }
+    }
+}
+
+#pragma mark - UNUserNotificationCenterDelegate end
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     
