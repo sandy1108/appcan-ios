@@ -853,8 +853,24 @@ NSString *AppCanJS = nil;
     
 }
 
+/**
+ 兼容iOS9以下系统的openURL代理
+
+ */
 -(BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
-    
+    [self appcanHandleApplication:application openURL:url];
+    return [self invokeAppDelegateMethod:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+}
+
+/**
+ iOS9新增的openURL代理，老的openURL代理已过时(iOS9以上不执行)
+ */
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(nonnull NSDictionary<NSString *,id> *)options{
+    [self appcanHandleApplication:application openURL:url];
+    return [self invokeAppDelegateMethod:application openURL:(NSURL *)url options:options];
+}
+
+- (BOOL)appcanHandleApplication:(UIApplication *)application openURL:(NSURL *)url {
     if (url != NULL) {
         
         NSString * strUrl = [url resourceSpecifier];
@@ -921,16 +937,12 @@ NSString *AppCanJS = nil;
         
     }
     //支付完成后返回当前应用shi调用
-	[self parseURL:url application:application];
-    
+    [self parseURL:url application:application];
     
     /*
      
      appcanEPortal://AppCan?qrNum=cdba6520-1aeb-4b4a-ae97-447af1787c80&message=AAECAzU5MzY3M0EwNTkzNzFDNjBDTj1ndW95dWFuL089Zm90b25vi2D9uc+KUNOUnarRu1XprPiaPg%3D%3D&ticketValue=eyJhbGciOiJIUzI1NiJ9.eyJyZXN1bHQiOiJ7XCJtYWlsXCI6XCJndW95dWFuQGZvdG9uLmNvbS5jblwiLFwibmFtZVwiOlwi6YOt546J5a6JXCIsXCJ1c2VyaWRcIjpcImd1b3l1YW5cIixcIm1vYmlsZVwiOlwiMTM5MDAwMDAwMDBcIixcIlNJQU1UR1RcIjpcIlRHVC02ODI1LXMxdGduZjVjRGlGUUtyNWF4NGhNcTk3cnJXTldjQVpjdmtQTE9ZZ2RqRWFreDZmY1dsLS5mb3Rvbi5jb20uY25cIixcImlhdFwiOjE0OTY3NDA3Njg5MjksXCJleHBcIjoxNDk2NzQ3OTY4OTI5fSJ9.BFSvM3nBVxFdgJ9I-mw4FQbdnvZ1oZP9WT9pCDHAHX4&ticketName=SIAMJWT&username=guoyuan
      */
-    [self invokeAppDelegateMethod:application openURL:url sourceApplication:sourceApplication annotation:annotation];
-    
-	return YES;
 }
 
 - (void)delayLoadByOtherAppWithParam:(NSString *)param {
@@ -1535,6 +1547,20 @@ NSString *AppCanJS = nil;
     
     return YES;
 }
+
+- (BOOL)invokeAppDelegateMethod:(UIApplication *)application openURL:(NSURL *)url options:(nonnull NSDictionary<NSString *,id> *)options{
+    for (NSInteger i = 0; i < [pluginObj.classNameArray count]; i++) {
+        NSString *className = [pluginObj.classNameArray objectAtIndex:i];
+        NSString * fullClassName = [NSString stringWithFormat:@"EUEx%@", [className substringFromIndex:3]];
+        Class acecls = NSClassFromString(fullClassName);
+        Method delegateMethod = class_getClassMethod(acecls, @selector(application:openURL:options:));
+        if (delegateMethod) {
+            [acecls application:application openURL:url options:options];
+        }
+    }
+    return YES;
+}
+
 - (void)invokeAppDelegateMethodApplicationWillResignActive:(UIApplication *)application
 {
     for (NSInteger i = 0; i < [pluginObj.classNameArray count]; i++) {

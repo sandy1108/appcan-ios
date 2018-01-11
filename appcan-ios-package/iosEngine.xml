@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <info>
-    <version>sdksuit_3.2_171115_01_e</version>
-    <package>ios_Engine_3.2_171115_01_e</package>
-    <description>openPopover方法兼容带锚点链接</description>
+    <version>sdksuit_3.2_180111_01_e</version>
+    <package>ios_Engine_3.2_180111_01_e</package>
+    <description>增加iOS9+的新的openURL代理方法处理并支持插件自定义处理</description>
 </info>
